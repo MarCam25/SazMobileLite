@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Configuracion">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#004d73"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#036ca1"
+            android:text="Registro de Área"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="25dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <EditText
+            android:id="@+id/idZona"
+            android:inputType="textCapCharacters"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:background="#ffff"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            />
+
+        <Button
+            android:id="@+id/idGuardar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="GUARDAR"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            />
+        <Button
+            android:id="@+id/idActualizar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Actualizar"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <Button
+                android:id="@+id/idaltaArea"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Alta de zona"
+                android:layout_marginTop="20dp"
+                />
+
+            <Button
+                android:id="@+id/altaProducto"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Ubicar Producto"
+                android:layout_marginTop="20dp"
+                />
+
+
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="25dp"
+                android:textColor="#ffffff"
+                android:background="#036ca1"
+                android:text="Áreas existentes"
+                />
+
+        </LinearLayout>
+
+
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyAreas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+
+
+
+    </LinearLayout>
+
+
+</FrameLayout>
