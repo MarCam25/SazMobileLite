@@ -5,12 +5,11 @@
 <TextView
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:textSize="23dp"
+    android:textSize="16dp"
     android:width="10dp"
     android:padding="8dp"
+    android:textStyle="normal"
     android:background="#f4f4f3"
     android:textColor="#303031"
     xmlns:android="http://schemas.android.com/apk/res/android"
-
-
     />

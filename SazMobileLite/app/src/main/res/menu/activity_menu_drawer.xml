@@ -4,22 +4,30 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_view"
+
+            android:backgroundTint="#000000"
+            android:title="Consultar Existencias:" />
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/inventario"
             android:backgroundTint="#000000"
-            android:title="Consultar Existencias" />
+            android:title="Por estilo" />
         <item
+            android:id="@+id/nav_vender"
+            android:icon="@drawable/inventario"
+            android:backgroundTint="#000000"
+            android:title="Por marca"
+            />
+        <item
+
             android:id="@+id/nav_cerrar"
             android:icon="@drawable/cerrar"
             android:backgroundTint="#000000"
             android:title="Cerrar Sesión"
-             />
-        <item
-            android:id="@+id/nav_vender"
-
-            android:backgroundTint="#000000"
-            android:title="" />
+          />
         <item
             android:id="@+id/nav_manage"
 

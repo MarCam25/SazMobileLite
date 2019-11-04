@@ -43,7 +43,6 @@ public class ActPrincipal extends AppCompatActivity {
     ModeloEmpresa me=new ModeloEmpresa();
     ConexionBDCliente bdc=new ConexionBDCliente();
     Button acep;
-    ModeloDatos md=new ModeloDatos();
     CheckBox check;
     ArrayList listaTiendas=new ArrayList();
     ArrayList listaZonas=new ArrayList();
@@ -51,7 +50,7 @@ public class ActPrincipal extends AppCompatActivity {
     public String numeroTienda;
     private Spinner spTiendas, spZona;
     ConexionSQLiteHelper conn=new ConexionSQLiteHelper(this,"db tienda",null,1);
-    String repetido;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,12 +119,7 @@ public class ActPrincipal extends AppCompatActivity {
 
                 toaste.show();
 
-
-
                     obtenerNumero();
-
-
-
 
 
             }
@@ -363,7 +357,7 @@ public class ActPrincipal extends AppCompatActivity {
 
 
     private void insertarEntrada() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-hhmmss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-hh:mm:ss", Locale.getDefault());
         Date date = new Date();
 
         String fecha = dateFormat.format(date);
@@ -378,7 +372,7 @@ public class ActPrincipal extends AppCompatActivity {
 
 
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Error al insertar en asistencias", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Error al insertar en asistencias"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -446,6 +440,7 @@ public class ActPrincipal extends AppCompatActivity {
             while(rs.next()){
                 id=rs.getString(1);
             }
+            st.close();
 
         } catch (Exception e) {
 
@@ -460,6 +455,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table comandero(numero varchar(50), tienda numeric(5,0), cliente nvarchar(50), fecha date, total decimal(18,2), status nchar(1), pares numeric(4,0), empleado varchar(50), impreso bit, llave uniqueidentifier);";
             st.executeUpdate(sql);
+            st.close();
         }catch (SQLException e){
             e.getMessage();
             Toast.makeText(getApplicationContext(),"No se puede crear la tabla Comandero",Toast.LENGTH_LONG);
@@ -473,6 +469,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table AreasDeControl(idArea numeric(18,0) IDENTITY, idTienda numeric(18,0), nombre nchar(50));";
             st.executeUpdate(sql);
+            st.close();
         }catch (SQLException e){
             e.getMessage();
             Toast.makeText(getApplicationContext(),"No se puede crear la tabla AreasDeControl ",Toast.LENGTH_LONG);
@@ -486,6 +483,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table AreasDeControl (idZona numeric(18,0) IDENTITY, idTienda nvarchar(50), nombre nchar(50), idArea numeric(18, 0))";
             st.executeUpdate(sql);
+            st.close();
         }catch (SQLException e){
             e.getMessage();
             Toast.makeText(getApplicationContext(),"No se puede crear la tabla AreasDeControl ",Toast.LENGTH_LONG);
@@ -499,6 +497,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table AreasAsignadas (idTienda numeric(18,0), idArea nvarchar(50), idEmpleado numeric(18,0), fecha date, hora time(2))";
             st.executeUpdate(sql);
+            st.close();
         }catch (SQLException e){
             e.getMessage();
             Toast.makeText(getApplicationContext(),"No se puede crear la tabla AreasDeControl ",Toast.LENGTH_LONG);
@@ -510,6 +509,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table UbicacionesProductos (idTienda numeric(18,0), idZona numeric(18,0), barcode nvarchar(50), id numeric(18,0) IDENTITY, hora time(2))";
             st.executeUpdate(sql);
+            st.close();
         }catch (Exception e){
             e.getMessage();
         }
@@ -521,6 +521,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table comanderoDet (numero varchar(50), tienda numeric(5,0), barcode nvarchar(50), estilo nvarchar(50),color nvarchar(50), marca nvarchar(50), acabado nvarchar(50), talla decimal(4,1), status char(1), ubicacion nvarchar(50), llave uniqueidentifier)";
             st.executeUpdate(sql);
+            st.close();
         }catch (Exception e ){
             e.getMessage();
         }
@@ -533,6 +534,7 @@ public class ActPrincipal extends AppCompatActivity {
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="Create table comanderoLog (numero varchar(50), fecha date, hora time(7), llave uniqueidentifier)";
             st.executeUpdate(sql);
+            st.close();
         }catch (Exception e ){
             e.getMessage();
         }
@@ -544,8 +546,9 @@ public class ActPrincipal extends AppCompatActivity {
     public void dropSP(){
         try{
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="drop procedure lupita";
+            String sql="drop procedure lupitaApartados";
             st.executeUpdate(sql);
+            st.close();
         }catch (Exception e ){
             e.getMessage();
         }
@@ -555,11 +558,10 @@ public class ActPrincipal extends AppCompatActivity {
     public void crearSp(){
         try{
             Statement st=bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="\n" +
-                    "\n" +
-                    "CREATE PROCEDURE [dbo].[Lupita] @Barcode AS VARCHAR(8000) = NULL\n" +
+            String sql="CREATE PROCEDURE [dbo].[LupitaApartados] @Barcode AS VARCHAR(8000) = NULL\n" +
                     "\t,@TallaBusca AS VARCHAR(5)\n" +
-                    "\t,@TiendaBusca AS DECIMAL\n" +
+                    "\t,@TiendaBusca AS DECIMAL \n" +
+                    "\t,@FechaBusca AS VARCHAR(8)\n" +
                     "AS\n" +
                     "SET NOCOUNT ON\n" +
                     "\n" +
@@ -590,25 +592,11 @@ public class ActPrincipal extends AppCompatActivity {
                     "\n" +
                     "IF @TiendaBusca <= 0\n" +
                     "BEGIN\n" +
-                    "\tIF CAST(@TallaBusca AS decimal) > 0\n" +
-                    "\tBEGIN\n" +
-                    "\t\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen WHERE Barcode = ''' + @Barcode + ''' AND Talla = ' + CAST(@TallaBusca AS NVARCHAR(10)) + ' AND Cantidad > 0'\n" +
-                    "\tEND\n" +
-                    "\tElSE\n" +
-                    "\tBEGIN\n" +
-                    "\t\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen WHERE Barcode = ''' + @Barcode + ''' AND Cantidad > 0'\n" +
-                    "\tEND\n" +
+                    "\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen'\n" +
                     "END\n" +
                     "ELSE\n" +
                     "BEGIN\n" +
-                    "\tIF CAST(@TallaBusca AS decimal) > 0\n" +
-                    "\tBEGIN\n" +
-                    "\t\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen WHERE Tienda = ' + CAST(@TiendaBusca AS NVARCHAR(10)) + ' AND Barcode = ''' + @Barcode + ''' AND Talla = ' + CAST(@TallaBusca AS NVARCHAR(10)) + ' AND Cantidad > 0'\n" +
-                    "\tEND\n" +
-                    "\tELSE\n" +
-                    "\tBEGIN\n" +
-                    "\t\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen WHERE Tienda = ' + CAST(@TiendaBusca AS NVARCHAR(10)) + ' AND Barcode = ''' + @Barcode + ''' AND Cantidad > 0'\n" +
-                    "\tEND\n" +
+                    "\tSET @SQL = 'Insert Into ##TempTienda (Tienda) Select Distinct Tienda From Existen WHERE Tienda = ' + CAST(@TiendaBusca AS NVARCHAR(10))\n" +
                     "END\n" +
                     "EXECUTE (@SQL)\n" +
                     "\n" +
@@ -628,6 +616,7 @@ public class ActPrincipal extends AppCompatActivity {
                     "\n" +
                     "DECLARE @CompTalla AS NVARCHAR(MAX)\n" +
                     "DECLARE @CompTiend AS NVARCHAR(MAX)\n" +
+                    "DECLARE @CompFecha AS NVARCHAR(250)\n" +
                     "DECLARE @SiHay AS INT\n" +
                     "\n" +
                     "SET @SiHay = 0\n" +
@@ -650,7 +639,16 @@ public class ActPrincipal extends AppCompatActivity {
                     "\tSET @CompTiend = ' AND existen.TIENDA = ' + CAST(@TiendaBusca AS NVARCHAR(10))\n" +
                     "END\n" +
                     "\n" +
-                    "SET @SQL = 'SELECT existen.BARCODE, tiendas.NOMBRE AS Tienda, existen.TALLA, existen.CANTIDAD Into ##TempTallas FROM existen INNER JOIN tiendas ON existen.TIENDA = tiendas.NUMERO INNER JOIN  articulo ON existen.BARCODE = articulo.BARCODE INNER JOIN colores ON articulo.COLOR = colores.numero INNER JOIN acabados ON articulo.ACABADO = acabados.numero INNER JOIN marcas ON articulo.MARCA = marcas.numero INNER JOIN sublinea ON articulo.SUBLINEA = sublinea.numero INNER JOIN lineas ON articulo.LINEA = lineas.NUMERO inner join corridas on corridas.id=articulo.corrida inner join temporad on temporad.numero=articulo.temporad Where (Existen.Tienda In (Select Tienda From ##TempTienda)) And (Existen.Cantidad <> 0) ' + @CompTalla + @CompTiend + ' and articulo.barcode in(''' + @Barcode + ''')'\n" +
+                    "IF NOT NULLIF(@FechaBusca, '') IS NULL\n" +
+                    "BEGIN\n" +
+                    "    SET @CompFecha = ' AND detap.FECHA >= ''' + @FechaBusca + ''''\n" +
+                    "END\n" +
+                    "ELSE\n" +
+                    "BEGIN\n" +
+                    "    SET @CompFecha = ''\n" +
+                    "END\n" +
+                    "\n" +
+                    "SET @SQL = 'SELECT existen.BARCODE, tiendas.NOMBRE AS Tienda, existen.TALLA, ISNULL(existen.CANTIDAD, 0) - ISNULL(existen.CANTREAL, 0) - (SELECT ISNULL(SUM(CANTIDAD), 0) AS CUANTOS FROM detap WHERE BARCODE = existen.BARCODE AND PUNTO = existen.TALLA AND TIENDA = existen.TIENDA) AS CANTIDAD Into ##TempTallas FROM existen LEFT JOIN tiendas ON existen.TIENDA = tiendas.NUMERO Where (Existen.Tienda In (Select Tienda From ##TempTienda)) And (Existen.Cantidad <> 0) ' + @CompTalla + @CompTiend + ' and existen.barcode in(''' + @Barcode + ''') GROUP BY existen.BARCODE, tiendas.NOMBRE, existen.TALLA, existen.TIENDA, Existen.Cantidad, existen.CANTREAL ORDER BY existen.BARCODE, existen.TALLA'\n" +
                     "EXECUTE (@SQL)\n" +
                     "\n" +
                     "SET @sql = 'DECLARE temp_cursor CURSOR FOR SELECT Distinct existen.TALLA FROM existen INNER JOIN tiendas ON existen.TIENDA = tiendas.NUMERO INNER JOIN articulo ON existen.BARCODE = articulo.BARCODE INNER JOIN colores ON articulo.COLOR = colores.numero INNER JOIN acabados ON articulo.ACABADO = acabados.numero INNER JOIN marcas ON articulo.MARCA = marcas.numero INNER JOIN sublinea ON articulo.SUBLINEA = sublinea.numero INNER JOIN lineas ON articulo.LINEA = lineas.NUMERO inner join corridas on corridas.id=articulo.corrida Where (Existen.Tienda In (Select Tienda From ##TempTienda)) And (Existen.Cantidad <> 0) and articulo.barcode in( ''' + @Barcode + ''') ' + @CompTalla + @CompTiend + ' Order by Talla'\n" +

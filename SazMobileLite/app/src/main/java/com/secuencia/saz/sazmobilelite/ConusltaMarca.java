@@ -1,8 +1,6 @@
 package com.secuencia.saz.sazmobilelite;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,25 +12,18 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.Layout;
 import android.text.TextWatcher;
-import android.text.method.BaseKeyListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-
-
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -76,19 +67,18 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.xml.transform.Result;
-
-import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 
+public class ConusltaMarca extends Fragment {
 
-public class ConsultaF extends Fragment {
+
 
     int cantidadRegistros;
     static Timer temporizadorPedido;
     private TimerTask tarea;
     private Handler handler = new Handler();
     static int scu=0;
+    Similares simi=new Similares();
     static String colorBar, acabadoBar, marcaBar, corridaBar;
     public static boolean not=false;
     public static boolean vuelta=false;
@@ -109,10 +99,10 @@ public class ConsultaF extends Fragment {
     ConexionSqlServer conex=new ConexionSqlServer();
     int cantidad=0;
     public static int up=0;
-    String temporad="";
     public static String VarEstilo;
     static String clint, BarCodeFIN="";
     static  String estiloBar="";
+    String temporad="";
     TextView edtCodigo;
     String variableS,descuento;
 
@@ -146,7 +136,7 @@ public class ConsultaF extends Fragment {
     String estiloTem,puntoTem,precioTem, cantidadTem;
     String dispositivo;
 
-    static int colorCantidad=-1, acabadoCantidad=0, marcaCantidad=0, corridaCantidad=0,puntosCantidad=0;
+    static int colorCantidad=-1, acabadoCantidad=0, marcaCantidad=0, corridaCantidad=0,puntosCantidad=0,estiloCantidad=0;
 
     TextView precioTXT;
     int index=0;
@@ -162,8 +152,10 @@ public class ConsultaF extends Fragment {
     String num, str,mar;
     public static TextView existenciasTXT, cantidadTXT, unidadesTXT, importeTXT,descuentoTXT,totalTXT;
 
-    public static EditText sp2;
+    public static Spinner sp2;
     static TextView clienteTXT;
+    ArrayList listaEstilo=null;
+
 
     double r;
     static String in, finn, inc;
@@ -190,7 +182,7 @@ public class ConsultaF extends Fragment {
     Double precioPedido;
     Button btnSimilares;
 
-   public  static  String idMarca=null;
+    public  static  String idMarca=null;
     Button btnOtras;
 
     static DatosLupita dl=new DatosLupita();
@@ -202,17 +194,18 @@ public class ConsultaF extends Fragment {
     SpinnerDialog spinnerDialog;
 
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
 
 
-        root= inflater.inflate(R.layout.fragment_consulta, container, false);
+        root= inflater.inflate(R.layout.fragment_conuslta_marca, container, false);
         context=root.getContext();
 
         //  Toast.makeText(getActivity(), "Get"+mt.getNombreTienda(), Toast.LENGTH_SHORT).show();
         String[] ar;
-
 
 
         listado=mt.getNombreTienda();
@@ -228,7 +221,10 @@ public class ConsultaF extends Fragment {
 
 
 
-        sp2=(EditText)root.findViewById(R.id.sp2);
+
+
+
+        sp2=(Spinner)root.findViewById(R.id.sp2);
         btnDetalle=(Button)root.findViewById(R.id.btnDetalle);
         btnOtras=(Button)root.findViewById(R.id.btnOtras);
         btnSimilares=(Button)root.findViewById(R.id.btnSimilares);
@@ -251,9 +247,138 @@ public class ConsultaF extends Fragment {
 
 
 
-        Toast.makeText(getContext(),"",Toast.LENGTH_LONG);
+        spMarca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                try{
+
+                    sp2.setAdapter(null);
+                    spColor.setAdapter(null);
+                    spAcabado.setAdapter(null);
+                    spCorrida.setAdapter(null);
+                    punto.setAdapter(null);
 
 
+
+                    contarEstilos();
+                    if(estiloCantidad!=0) {
+
+                        sp2.setAdapter(null);
+                        llenarEstilos();
+
+                    }
+
+
+
+
+
+                }catch (IndexOutOfBoundsException e){
+                    e.getMessage();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+
+            }
+        });
+
+
+
+
+        sp2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+
+                buscador=0;
+                colorCantidad=0;
+                acabadoCantidad=0;
+                colorCantidad=0;
+                puntosCantidad=0;
+
+                listaCorrida.clear();
+
+
+                listaAcabado.clear();
+                lista.clear();
+
+
+                limpiarCajas();
+
+
+
+                Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG).show();
+
+                puntos.clear();
+
+
+                punto.setAdapter(null);
+                idMarca=getMarca(spMarca.getSelectedItem().toString());
+                contarSp();
+                if(colorCantidad>0) {
+                    if (Principal.scannPass == true && buscador == 0) {
+                        llenarSp();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(root.getContext(), R.layout.spinner_item, lista);
+                        spColor.setAdapter(adapter);
+                        spColor.setSelection(obtenerPosicionItem(spColor, colorBar));
+                    } else if (Principal.scannPass == false && colorCantidad == 1 && buscador == 0) {
+                        llenarSp();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
+                        spColor.setAdapter(adapter);
+                        spColor.setSelection(1);
+
+                    } else if (Principal.scannPass == false && colorCantidad > 1 && buscador == 0) {
+                        llenarSp();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
+                        spColor.setAdapter(adapter);
+
+                    } else if (buscador == 1 && Principal.scannPass==false) {
+                        buscarMarcas();
+
+                        if (marcaCantidad == 1) {
+
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                            spMarca.setAdapter(adapter);
+                            spMarca.setSelection(1);
+
+
+
+                        } else if (marcaCantidad > 1) {
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                            spMarca.setAdapter(adapter);
+
+
+                        }
+
+                    } else if (Principal.scannPass == false && buscador == 0) {
+                        llenarSp();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
+                        spColor.setAdapter(adapter);
+
+                    }else if(buscador == 1 && Principal.scannPass==true){
+                        buscarMarcas();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                        spMarca.setAdapter(adapter);
+                        spMarca.setSelection(obtenerPosicionItem(spMarca, marcaBar));
+
+                    }
+                }else{
+                    Toast.makeText(getActivity(),"Estilo no valido",Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         if(Principal.similarPass==true){
 
@@ -265,15 +390,7 @@ public class ConsultaF extends Fragment {
         retomarPedidos();
         ConsultarNuevosRegistros();
 
-
-
-
-
-
-
-
-
-
+        inicializarMarca();
 
         btnSimilares.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,6 +401,7 @@ public class ConsultaF extends Fragment {
                     try {
 
 
+                        Principal.punto=punto.getSelectedItem().toString();
                         dl.setBarcode(barcode);
                         dl.setPunto(punto.getSelectedItem().toString());
 
@@ -320,13 +438,11 @@ public class ConsultaF extends Fragment {
         });
 
 
-
-
         btnBardoce.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 xcaner=true;
-                startActivity(new Intent(getActivity(),Scann.class));
+                startActivity(new Intent(getActivity(), Scann.class));
 
 
             }
@@ -340,17 +456,14 @@ public class ConsultaF extends Fragment {
                 try {
 
 
-
-
-
-                    if(sp2.getText().toString().equals("")) {
+                    if(sp2.getSelectedItem().toString().equals("")) {
                         Toast.makeText(getActivity(),"Debes seleccionar estilo y punto ",Toast.LENGTH_LONG).show();
                     }else{
                         try {
 
                             Intent detalle = new Intent(getActivity(), Detalle.class);
 
-                            detalle.putExtra("valores", sp2.getText() + "-" + Principal.idColor + "-" + Principal.idAcabado + "-" +idMarca + "-" + empress);
+                            detalle.putExtra("valores", sp2.getSelectedItemId() + "-" + Principal.idColor + "-" + Principal.idAcabado + "-" + idMarca + "-" + empress);
 
                             startActivity(detalle);
                         }catch (Exception ex){
@@ -372,6 +485,9 @@ public class ConsultaF extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+                Toast.makeText(root.getContext(), "Cargando...", Toast.LENGTH_SHORT).show();
+
+
                 if(punto.getSelectedItem().equals("")) {
 
                 }else{
@@ -386,7 +502,7 @@ public class ConsultaF extends Fragment {
             }
         });
 
-
+/*
 
         sp2.addTextChangedListener(new TextWatcher()
         {
@@ -394,16 +510,10 @@ public class ConsultaF extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 lista.clear();
                 spColor.setAdapter(null);
-
                 listaAcabado.clear();
                 spAcabado.setAdapter(null);
-
-                listaMarca.clear();
-                spMarca.setAdapter(null);
-
                 listaCorrida.clear();
                 spCorrida.setAdapter(null);
-
                 limpiarCajas();
 
                 puntos.clear();
@@ -436,7 +546,7 @@ public class ConsultaF extends Fragment {
 
             }
         });
-
+*/
 
 
 /*
@@ -466,216 +576,91 @@ public class ConsultaF extends Fragment {
         }
 */
 
-        sp2.setOnKeyListener(new View.OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                // If the event is a key-down event on the "enter" button
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-
-                    buscador=0;
-
-                    buscador();
-
-
-                    limpiarListas();
-                    limpiarCajas();
-                    ReinicarContadores();
-
-
-                    Toast toast = Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG);
-                    TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
-                    x.setTextColor(Color.BLACK); toast.show();
-
-                    puntos.clear();
-                    mismoDispositivo();
-
-
-                    punto.setAdapter(null);
-
-                    contarSp();
-                    if(colorCantidad>0) {
-                        if (Principal.scannPass == true && buscador == 0) {
-                            llenarSp();
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
-                            spColor.setAdapter(adapter);
-                            spColor.setSelection(obtenerPosicionItem(spColor, colorBar));
-                        } else if (Principal.scannPass == false && colorCantidad == 1 && buscador == 0) {
-                            llenarSp();
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
-                            spColor.setAdapter(adapter);
-                            spColor.setSelection(1);
-
-
-                        } else if (Principal.scannPass == false && colorCantidad > 1 && buscador == 0) {
-                            llenarSp();
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
-                            spColor.setAdapter(adapter);
-
-                        } else if (buscador == 1 && Principal.scannPass==false) {
-                            buscarMarcas();
-
-                            if (marcaCantidad == 1) {
-
-
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
-                              /*  spinnerDialog=new SpinnerDialog(getActivity(),listaMarca,"Selecciona marca ","ok");// With 	Animation
-                                spinnerDialog.setCancellable(true); // for cancellable
-                                spinnerDialog.setShowKeyboard(false); */
-                                spMarca.setAdapter(adapter);
-
-
-
-                            } else if (marcaCantidad > 1) {
-
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
-                               spMarca.setAdapter(adapter);
-
-/*
-                                spinnerDialog=new SpinnerDialog(getActivity(),listaMarca,"Seleccione marca","ok");// With 	Animation
-                                spinnerDialog.setCancellable(true); // for cancellable
-                                spinnerDialog.setShowKeyboard(false);*/
-
-                            }
-
-                        } else if (Principal.scannPass == false && buscador == 0) {
-                            llenarSp();
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, lista);
-                            spColor.setAdapter(adapter);
-
-                        }else if(buscador == 1 && Principal.scannPass==true){
-                            buscarMarcas();
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
-                            spMarca.setAdapter(adapter);
-                            spMarca.setSelection(obtenerPosicionItem(spMarca, marcaBar));
-
-                        }
-                    }else{
-                        Toast.makeText(getActivity(),"Estilo no valido",Toast.LENGTH_LONG).show();
-                    }
-
-
-
-                    return true;
-                }
-                return false;
-            }
-        });
 
 
 
 
-    spColor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            try {
-                Toast toast = Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG);
-                TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
-                x.setTextColor(Color.BLACK);
-                toast.show();
-                listaAcabado.clear();
-                listaMarca.clear();
-                listaCorrida.clear();
-                puntos.clear();
-                spAcabado.setAdapter(null);
-                spMarca.setAdapter(null);
-                spCorrida.setAdapter(null);
-                punto.setAdapter(null);
-                precioTXT.setText(null);
-                limpiarCajas();
-                ReinicarContadores();
-                spAcabado.setAdapter(null);
-                listaAcabado.clear();
-                SearchableSpinner spin = new SearchableSpinner(getActivity());
 
-                SearchableListDialog sld = new SearchableListDialog();
-                sld.setTitle("selecciona marca");
-                contarSp3();
-
-                if (Principal.scannPass == true) {
-                    llenarSp3();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
-                    spAcabado.setAdapter(adapter);
-                    spAcabado.setSelection(obtenerPosicionItem(spAcabado, acabadoBar));
-                    sld.setTitle("selecciona marca");
-                    spin.setTitle("Selecciona una marca");
-                } else if (Principal.scannPass == false && acabadoCantidad == 1) {
-                    llenarSp3();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
-                    spAcabado.setAdapter(adapter);
-                    spAcabado.setSelection(1);
-                    sld.setTitle("selecciona marca");
-                    spin.setTitle("Selecciona una marca");
-
-
-                } else if (Principal.scannPass == false && acabadoCantidad > 1) {
-                    llenarSp3();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
-                    spAcabado.setAdapter(adapter);
-
-                    sld.setTitle("selecciona marca");
-                    spin.setTitle("Selecciona una marca");
-
-                }
-
-            }catch (IllegalStateException e){
-                e.getMessage();
-
-            }
-            }
-
-            @Override
-            public void onNothingSelected (AdapterView < ? > parent){
-
-            }
-
-
-    });
-
-
-
-        spAcabado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spColor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                listaMarca.clear();
-                listaCorrida.clear();
-                puntos.clear();
 
-                spMarca.setAdapter(null);
-                spCorrida.setAdapter(null);
-                punto.setAdapter(null);
-                limpiarCajas();
+                try {
 
-                ReinicarContadores();
+                    Toast toast = Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG);
+                    TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
+                    x.setTextColor(Color.BLACK);
+                    toast.show();
+                    listaAcabado.clear();
 
-                contarSp4();
-                if(Principal.scannPass==true){
-                    llenarSp4();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, listaMarca);
-                    spMarca.setAdapter(adapter);
-                    spMarca.setSelection(obtenerPosicionItem(spMarca,marcaBar));
-                }else if(Principal.scannPass==false && marcaCantidad==1){
-                    llenarSp4();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, listaMarca);
-                    spMarca.setAdapter(adapter);
-                    spMarca.setSelection(1);
+                    listaCorrida.clear();
+                    puntos.clear();
+                    spAcabado.setAdapter(null);
+
+                    spCorrida.setAdapter(null);
+                    punto.setAdapter(null);
+                    precioTXT.setText(null);
+                    limpiarCajas();
+                    ReinicarContadores();
+                    spAcabado.setAdapter(null);
+                    listaAcabado.clear();
+                    com.toptoche.searchablespinnerlibrary.SearchableSpinner spin = new SearchableSpinner(getActivity());
+
+                    SearchableListDialog sld = new SearchableListDialog();
+                    sld.setTitle("selecciona marca");
+                    contarSp3();
+
+                    String validador = null;
+                    validador = spColor.getSelectedItem().toString();
+                    if (!validador.isEmpty()) {
 
 
-                }else if(Principal.scannPass==false && marcaCantidad>1){
-                    llenarSp4();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, listaMarca);
-                    spMarca.setAdapter(adapter);
+                        if (Principal.scannPass == true) {
+                            llenarSp3();
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
+                            spAcabado.setAdapter(adapter);
+                            spAcabado.setSelection(obtenerPosicionItem(spAcabado, acabadoBar));
+                            sld.setTitle("selecciona marca");
+                            spin.setTitle("Selecciona una marca");
+                        } else if (Principal.scannPass == false && acabadoCantidad == 1) {
+                            llenarSp3();
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
+                            spAcabado.setAdapter(adapter);
+                            spAcabado.setSelection(1);
+                            sld.setTitle("selecciona marca");
+                            spin.setTitle("Selecciona una marca");
+
+
+                        } else if (Principal.scannPass == false && acabadoCantidad > 1) {
+                            llenarSp3();
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaAcabado);
+                            spAcabado.setAdapter(adapter);
+
+                            sld.setTitle("selecciona marca");
+                            spin.setTitle("Selecciona una marca");
+
+                        }
+                    }
+
+                }catch (IllegalStateException e){
+                    e.getMessage();
 
                 }
-            }
+                }
+
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+
+
         });
 
-        spMarca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+
+        spAcabado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -749,13 +734,12 @@ public class ConsultaF extends Fragment {
 
                         }
                     }
-                    }catch(Exception e){
-
-                    }
+                }catch(Exception e){
 
                 }
 
 
+            }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -763,86 +747,95 @@ public class ConsultaF extends Fragment {
             }
         });
 
+
+
         spCorrida.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+                String validador = "";
+                validador = spCorrida.getSelectedItem().toString();
+                if (validador.equals(" ")) {
+                    puntos.clear();
+                    punto.setAdapter(null);
 
-                punto.setAdapter(null);
-                puntos.clear();
-                limpiarCajas();
-                ReinicarContadores();
-                puntos.clear();
-                punto.setAdapter(null);
+                }
+                else{
+                    punto.setAdapter(null);
+                    puntos.clear();
+                    limpiarCajas();
+                    ReinicarContadores();
+                    puntos.clear();
+                    punto.setAdapter(null);
 
-                //   llenarExistencias();
-                traerDatosProducto();
-                llenarTabla();
-                contarPuntos();
-                if(Principal.scannPass==true && buscador==0 ){
+                    //   llenarExistencias();
                     llenarTabla();
-                    llenarPuntos();
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                    punto.setAdapter(adapter);
-                    punto.setSelection(obtenerPosicionItem(punto,String.valueOf(puntoBar)));
-                    Principal.scannPass=false;
-                }else if(Principal.scannPass==false && puntosCantidad==1 && buscador==0){
-                    llenarTabla();
-                    llenarPuntos();
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                    punto.setAdapter(adapter);
-
-
-                }else if(Principal.scannPass==false && puntosCantidad>1 && buscador==0){
-                    llenarTabla();
-                    llenarPuntos();
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                    punto.setAdapter(adapter);
-
-                }else if(buscador==1 && Principal.scannPass==false){
+                    contarPuntos();
                     traerDatosProducto();
-                    llenarPuntos();
-                    if(puntosCantidad==1){
-                        llenarTabla();
-
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                        punto.setAdapter(adapter);
-
-
-                    }else if( puntosCantidad>1){
+                    if (Principal.scannPass == true && buscador == 0) {
                         llenarTabla();
                         llenarPuntos();
 
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
                         punto.setAdapter(adapter);
+                        punto.setSelection(obtenerPosicionItem(punto, String.valueOf(puntoBar)));
+                        Principal.scannPass = false;
+                    } else if (Principal.scannPass == false && puntosCantidad == 1 && buscador == 0) {
+                        llenarTabla();
+                        llenarPuntos();
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                        punto.setAdapter(adapter);
+
+
+                    } else if (Principal.scannPass == false && puntosCantidad > 1 && buscador == 0) {
+                        llenarTabla();
+                        llenarPuntos();
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                        punto.setAdapter(adapter);
+
+                    } else if (buscador == 1 && Principal.scannPass == false) {
+                        traerDatosProducto();
+                        llenarPuntos();
+                        if (puntosCantidad == 1) {
+                            llenarTabla();
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                            punto.setAdapter(adapter);
+
+
+                        } else if (puntosCantidad > 1) {
+                            llenarTabla();
+                            llenarPuntos();
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                            punto.setAdapter(adapter);
+
+                        }
+
+
+                    } else if (Principal.scannPass == false && buscador == 0) {
+                        llenarTabla();
+                        llenarPuntos();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                        punto.setAdapter(adapter);
+
+                    } else if (buscador == 1 && Principal.scannPass == true) {
+                        Similar simi = new Similar();
+                        traerDatosProducto();
+                        llenarPuntos();
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
+                        punto.setAdapter(adapter);
+                        punto.setSelection(obtenerPosicionItem(punto, String.valueOf(puntoBar)));
+                        Principal.scannPass = false;
+
 
                     }
 
 
-                }else if(Principal.scannPass==false && buscador==0){
-                    llenarTabla();
-                    llenarPuntos();
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                    punto.setAdapter(adapter);
-
-                }else if(buscador==1 && Principal.scannPass==true){
-                    Similar simi=new Similar();
-                    traerDatosProducto();
-                    llenarPuntos();
-
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item_punto, puntos);
-                        punto.setAdapter(adapter);
-                        punto.setSelection(obtenerPosicionItem(punto,String.valueOf(puntoBar)));
-                        Principal.scannPass=false;
-
-
-
                 }
-
-
             }
 
             @Override
@@ -852,6 +845,8 @@ public class ConsultaF extends Fragment {
         });
 
         return root;
+
+
     }
 
 
@@ -859,7 +854,7 @@ public class ConsultaF extends Fragment {
         up += cantidad;
         cantidad = 0;
 
-        contVal+="-"+sp2.getText().toString();
+        contVal+="-"+sp2.getSelectedItem().toString();
         contCant+="-"+up;
         unidadesTXT.setText(String.valueOf(up));
 
@@ -882,7 +877,7 @@ public class ConsultaF extends Fragment {
         puntoTem = punto.getSelectedItem().toString();
         tem = ((Double.parseDouble(variableS)-Double.parseDouble(descuento)) * cantidad);
         precioTem = String.valueOf(tem);
-        estiloTem = sp2.getText().toString();
+        estiloTem = sp2.getSelectedItem().toString();
         cantidadTem = String.valueOf(cantidad);
         Resumen(estiloTem, puntoTem, cantidadTem, precioTem);
         estiloTem = null;
@@ -1011,7 +1006,7 @@ public class ConsultaF extends Fragment {
             Toast.makeText(context, "Codigo de barras no existente en el sistema ", Toast.LENGTH_LONG).show();
             Principal.scannPass=false;
         }
-        sp2.setText(estiloBar);
+       // sp2.setText(estiloBar);
         cargarDatosBarcode();
 
         llenarSp();
@@ -1054,7 +1049,7 @@ public class ConsultaF extends Fragment {
                 corridaBar=rs.getString(4);
             }
             String estilo=getEstiloSimilar(barcode);
-            sp2.setText(estilo);
+            //sp2.setText(estilo);
             llenarSp();
             //
         } catch (SQLException e) {
@@ -1070,6 +1065,7 @@ public class ConsultaF extends Fragment {
             ResultSet rs = st.executeQuery(sql);
 
 
+
             while (rs.next()) {
                 acabadoBar=rs.getString(1);
                 colorBar=rs.getString(2);
@@ -1082,9 +1078,8 @@ public class ConsultaF extends Fragment {
             e.getMessage();
         }
     }
+
     public void buscarEnMitienda(int real){
-
-
         try {
 
             List<Map<String, String>> data = null;
@@ -1096,7 +1091,8 @@ public class ConsultaF extends Fragment {
             ResultSetMetaData rsmd=rs.getMetaData();
             while(rs.next()) {
 
-               // int apartado=consultarAPartados(barcode,puntoSp);
+
+                // int apartado=consultarAPartados(barcode,puntoSp);
                 existencias=(rs.getInt(2));
                 existenciasTXT.setText(String.valueOf(existencias));
 
@@ -1104,19 +1100,20 @@ public class ConsultaF extends Fragment {
 
         } catch (SQLException e1) {
             e1.printStackTrace();
-            Toast.makeText(getActivity(),"No hay existencias " , Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "No hay existencias ", Toast.LENGTH_LONG).show();
+
 
             int validador = validarTemporada(temporad);
             if (validador>0) {
                 Negar();
             }
-
-            existenciasTXT.setText("0.0");
+            existenciasTXT.setText("0");
 
         }
 
 
     }
+
     public int validarTemporada(String temporada)
     {
 
@@ -1157,6 +1154,7 @@ public class ConsultaF extends Fragment {
             ResultSetMetaData rsmd=rs.getMetaData();
             while(rs.next()) {
                 real =rs.getInt(1);
+                Toast.makeText(root.getContext(), "Cargando...", Toast.LENGTH_SHORT).show();
 
             }
 
@@ -1193,6 +1191,7 @@ public class ConsultaF extends Fragment {
         }
     }
 
+
     public void contarPuntos(){
 
         try {
@@ -1215,6 +1214,7 @@ public class ConsultaF extends Fragment {
         }
     }
 
+
     public static int obtenerPosicionItem(Spinner spinner, String fruta) {
         //Creamos la variable posicion y lo inicializamos en 0
         int posicion = 0;
@@ -1231,19 +1231,26 @@ public class ConsultaF extends Fragment {
         return posicion;
     }
 
+
     public  static void llenarSp() {
         lista.add(null);
         lista.clear();
         String add="";
         lista.add("");
+
+
+
+
+
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT c.color, numero from colores c inner join articulo a on c.numero = a.color where a.estilo = '"+sp2.getText()+"'";
+            String sql="select DISTINCT c.color, numero from colores c inner join articulo a on c.numero = a.color where a.estilo = '"+sp2.getSelectedItem()+"' and a.marca="+idMarca;
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 add=rs.getString(1);
                 colorCantidad ++;
                 lista.add(add);
+
             }
 
             //
@@ -1253,14 +1260,21 @@ public class ConsultaF extends Fragment {
 
     }
 
-    public  static void contarSp() {
+
+
+
+    public void contarSp() {
         lista.add(null);
         lista.clear();
         String add="";
         lista.add("");
+        idMarca=getMarca(spMarca.getSelectedItem().toString());
+
+
+
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT c.color, numero from colores c inner join articulo a on c.numero = a.color where a.estilo = '"+sp2.getText()+"'";
+            String sql="select DISTINCT c.color, c.numero from colores c inner join articulo a on c.numero = a.color inner join marcas m on m.numero=a.marca where a.estilo = '"+sp2.getSelectedItem()+"' and a.marca="+idMarca;
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 add=rs.getString(1);
@@ -1283,7 +1297,7 @@ public class ConsultaF extends Fragment {
 
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT  marcas.MARCA,articulo.MARCA   from articulo inner join marcas on articulo.MARCA=marcas.NUMERO where estilo='"+sp2.getText()+"' ";
+            String sql="select DISTINCT  marcas.MARCA,articulo.MARCA   from articulo inner join marcas on articulo.MARCA=marcas.NUMERO where estilo='"+sp2.getSelectedItem()+"' ";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1335,9 +1349,8 @@ public class ConsultaF extends Fragment {
         Principal.idColor=getColor(spColor.getSelectedItem().toString());
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT ac.Acabado, numero from acabados ac inner join articulo a on ac.numero = a.acabado where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+"";
+            String sql="select DISTINCT ac.Acabado, numero from acabados ac inner join articulo a on ac.numero = a.acabado where a.estilo = '"+sp2.getSelectedItem()+"' and a.Color = "+Principal.idColor+"";
             ResultSet rs = st.executeQuery(sql);
-
 
             while (rs.next()) {
 
@@ -1363,7 +1376,7 @@ public class ConsultaF extends Fragment {
         Principal.idColor=getColor(spColor.getSelectedItem().toString());
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT ac.Acabado, numero from acabados ac inner join articulo a on ac.numero = a.acabado where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+"";
+            String sql="select DISTINCT ac.Acabado, numero from acabados ac inner join articulo a on ac.numero = a.acabado where a.estilo = '"+sp2.getSelectedItem()+"' and a.Color = "+Principal.idColor+"";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1371,7 +1384,7 @@ public class ConsultaF extends Fragment {
 
                 acabadoCantidad++;
 
-               String add=(rs.getString(1));
+                String add=(rs.getString(1));
 
 
 
@@ -1411,10 +1424,10 @@ public class ConsultaF extends Fragment {
 
         listaMarca.clear();
         listaMarca.add(" ");
-        Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
+
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+"";
+            String sql="select DISTINCT  marca, numero from marcas ";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1431,6 +1444,7 @@ public class ConsultaF extends Fragment {
 
             // Toast.makeText(Principal.this,"Inicio de sesion Exitosa...!!!: " + empresa, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
+            e.getMessage();
             Toast.makeText(getActivity(), "Error en sp4", Toast.LENGTH_SHORT).show();
         }
 
@@ -1441,10 +1455,10 @@ public class ConsultaF extends Fragment {
 
         listaMarca.clear();
         listaMarca.add(" ");
-        Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
+
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+"";
+            String sql="select DISTINCT  marca, numero from marcas";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1461,6 +1475,7 @@ public class ConsultaF extends Fragment {
 
             // Toast.makeText(Principal.this,"Inicio de sesion Exitosa...!!!: " + empresa, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
+            e.getMessage();
             Toast.makeText(getActivity(), "Error en sp4", Toast.LENGTH_SHORT).show();
         }
 
@@ -1477,10 +1492,7 @@ public class ConsultaF extends Fragment {
 
                 idMarca=rs.getString(1);
 
-
-
             }
-
 
         } catch (Exception e) {
 
@@ -1491,12 +1503,14 @@ public class ConsultaF extends Fragment {
 
     public void llenarSp5() {
         idMarca=getMarca(spMarca.getSelectedItem().toString());
+        Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
         listaCorrida.clear();
         listaCorrida.add(" ");
 
+
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+" and a.marca =" +idMarca+"";
+            String sql="select  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getSelectedItem()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+" and a.marca =" +idMarca+"";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1519,12 +1533,14 @@ public class ConsultaF extends Fragment {
 
     public void contarSp5() {
         idMarca=getMarca(spMarca.getSelectedItem().toString());
+        Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
         listaCorrida.clear();
+
 
 
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getText()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+" and a.marca =" +idMarca+"";
+            String sql="select  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getSelectedItem()+"' and a.Color = "+Principal.idColor+" and a.acabado = "+Principal.idAcabado+" and a.marca =" +idMarca+"";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1553,7 +1569,7 @@ public class ConsultaF extends Fragment {
 
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getText()+"' and  a.marca =" +idMarca+"";
+            String sql="select DISTINCT  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getSelectedItem()+"' and  a.marca =" +idMarca+"";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -1605,6 +1621,7 @@ public class ConsultaF extends Fragment {
 
 
             while (rs.next()) {
+                Toast.makeText(root.getContext(), "Cargando...", Toast.LENGTH_SHORT).show();
                 variableS=rs.getString(1);
                 descuento=rs.getString(2);
                 auxiliarDes=Double.parseDouble(descuento)/100;
@@ -1638,9 +1655,9 @@ public class ConsultaF extends Fragment {
         Principal.idCorrida=getIdCorrida();
         where=" where ";
         if(buscador==0){
-            where+="a.estilo = '"+sp2.getText()+"' and a.Color ="+Principal.idColor+" and a.acabado ="+Principal.idAcabado+" and a.marca ="+idMarca+" and a.corrida="+Principal.idCorrida;
+            where+="a.estilo = '"+sp2.getSelectedItem()+"' and a.Color ="+Principal.idColor+" and a.acabado ="+Principal.idAcabado+" and a.marca ="+idMarca+" and a.corrida="+Principal.idCorrida;
         }else if(buscador==1){
-            where+="a.estilo = '"+sp2.getText()+"' and a.marca ="+idMarca+" and a.corrida="+Principal.idCorrida;
+            where+="a.estilo = '"+sp2.getSelectedItem()+"' and a.marca ="+idMarca+" and a.corrida="+Principal.idCorrida;
         }
 
 
@@ -1699,7 +1716,7 @@ public class ConsultaF extends Fragment {
                     "  left join empleado e on a.comprador=e.numero inner join departamentos d on a.DEPARTAMENTO=d.NUMERO\n" +
                     "  inner join tacones ta on a.TACON=ta.NUMERO inner join plantillas pl on a.PLANTILLA=pl.NUMERO inner join forros f on a.FORRO=f.NUMERO \n" +
                     "  inner join corridas co on a.corrida=co.id inner join suelas su on a.SUELA=su.numero inner join colores c on a.color = c.numero\n" +
-                    "  inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id=im.id where a.estilo = '"+sp2.getText()+"' and a.marca = "+idMarca+" and a.corrida="+Principal.idCorrida+" and a.color="+Principal.idColor+" and a.acabado="+Principal.idAcabado+"";
+                    "  inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id=im.id where a.estilo = '"+sp2.getSelectedItem()+"' and a.marca = "+idMarca+" and a.corrida="+Principal.idCorrida+" and a.color="+Principal.idColor+" and a.acabado="+Principal.idAcabado+"";
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
@@ -1715,7 +1732,6 @@ public class ConsultaF extends Fragment {
                 idImagen=rs.getString(8);
                 ubica=rs.getString(9);
                 temporad=rs.getString(10);
-
 
 
 
@@ -2093,6 +2109,38 @@ public class ConsultaF extends Fragment {
         }
 
     }
+
+
+    public void contarEstilos() {
+
+
+
+        try {
+            Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
+            String sql="select estilo from articulo where marca="+spMarca.getId();
+            ResultSet rs = st.executeQuery(sql);
+
+
+
+
+            while (rs.next()) {
+
+                estiloCantidad++;
+                String add=(rs.getString(1));
+
+
+            }
+            st.close();
+
+
+        } catch (Exception e) {
+            e.getMessage();
+            Toast.makeText(getActivity(), "Error en sp4", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
     public String ultimaVez(){
         String numeroT=null;
         try {
@@ -2113,6 +2161,42 @@ public class ConsultaF extends Fragment {
         return numeroT;
     }
 
+    public void llenarEstilos() {
+
+
+
+        listaEstilo=new ArrayList();
+        idMarca=getMarca(spMarca.getSelectedItem().toString());
+        try {
+            Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
+            String sql="select estilo from articulo where marca="+idMarca;
+            ResultSet rs = st.executeQuery(sql);
+
+
+
+
+            while (rs.next()) {
+
+                String estilo=(rs.getString(1));
+
+
+                if(!estilo.isEmpty()){
+                    listaEstilo.add(estilo);
+                }
+
+
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaEstilo);
+            sp2.setAdapter(adapter);
+            st.close();
+
+
+        } catch (Exception e) {
+            e.getMessage();
+            Toast.makeText(getActivity(), "Error en sp4", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
     public void ConsultarNuevosRegistros(){
         ModeloNumeroOrden mno=new ModeloNumeroOrden();
@@ -2161,7 +2245,7 @@ public class ConsultaF extends Fragment {
         try {
 
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql=" select DISTINCT corridas.id from corridas  inner join articulo on  corridas.id=articulo.corrida  where estilo='"+sp2.getText()+"' and marca="+idMarca +"and nombre='"+spCorrida.getSelectedItem()+"'";
+            String sql=" select DISTINCT corridas.id from corridas  inner join articulo on  corridas.id=articulo.corrida  where estilo='"+sp2.getSelectedItem()+"' and marca="+idMarca +"and nombre='"+spCorrida.getSelectedItem()+"'";
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -2240,73 +2324,95 @@ public class ConsultaF extends Fragment {
         }
 
     }
-public void ReinicarContadores(){
+    public void ReinicarContadores(){
         colorCantidad=0;
         acabadoCantidad=0;
-        marcaCantidad=0;
+
         corridaCantidad=0;
 
-}
-
-public void limpiarListas(){
-        listaCorrida.clear();
-        listaMarca.clear();
-        listaAcabado.clear();
-        lista.clear();
-}
-
-
-public void mismoDispositivo() {
-
-
-    String modelo = Build.MODEL;
-    String serie = Build.MANUFACTURER;
-    String marca = Build.ID;
-    try {
-        Statement st = conex.conexionBD().createStatement();
-
-        String sql = " SELECT idDisp FROM smAppAccesos where mail='" + mu.getCorreo() + "' and idempresa=" + me.getIdEmpresa() +"and app=1";
-        ResultSet rs = st.executeQuery(sql);
-
-        while (rs.next()) {
-            dispositivo = rs.getString(1);
-        }
-
-    } catch (Exception e) {
-        e.getMessage();
-        Toast.makeText(getActivity(), "No sé puede actualizar el dispositivo", Toast.LENGTH_SHORT).show();
     }
 
-    if (!dispositivo.isEmpty()) {
+    public void limpiarListas(){
+        listaCorrida.clear();
 
-        String predeterminada = dispositivo;
+        listaAcabado.clear();
+        lista.clear();
+    }
 
-        //declaramos una palabra de entrada
-        String entrada = marca+"-"+serie+"-"+modelo;
 
-        //variable usada para verificar si las palabras son iguales
-        String aux = "";
+    public void mismoDispositivo() {
 
-        //se verifica que ambas palabras tengan la misma longitud
-        //si no es asi no se pueden comparar
-        if (entrada != null) {
-            if (predeterminada.length() == entrada.length()) {
 
-                for (int i = 0; i < predeterminada.length(); i++) {
+        String modelo = Build.MODEL;
+        String serie = Build.MANUFACTURER;
+        String marca = Build.ID;
+        try {
+            Statement st = conex.conexionBD().createStatement();
 
-                    //verificamos si el primer caracter de predeterminada
-                    //es igual al primero de entrada
-                    if (predeterminada.charAt(i) == entrada.charAt(i)) {
-                        //si es asi guardamos ese concatenamos el caracter a la variable aux
-                        aux += predeterminada.charAt(i);
+            String sql = " SELECT idDisp FROM smAppAccesos where mail='" + mu.getCorreo() + "' and idempresa=" + me.getIdEmpresa() +"and app=1";
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                dispositivo = rs.getString(1);
+            }
+
+        } catch (Exception e) {
+            e.getMessage();
+            Toast.makeText(getActivity(), "No sé puede actualizar el dispositivo", Toast.LENGTH_SHORT).show();
+        }
+
+        if (!dispositivo.isEmpty()) {
+
+            String predeterminada = dispositivo;
+
+            //declaramos una palabra de entrada
+            String entrada = marca+"-"+serie+"-"+modelo;
+
+            //variable usada para verificar si las palabras son iguales
+            String aux = "";
+
+            //se verifica que ambas palabras tengan la misma longitud
+            //si no es asi no se pueden comparar
+            if (entrada != null) {
+                if (predeterminada.length() == entrada.length()) {
+
+                    for (int i = 0; i < predeterminada.length(); i++) {
+
+                        //verificamos si el primer caracter de predeterminada
+                        //es igual al primero de entrada
+                        if (predeterminada.charAt(i) == entrada.charAt(i)) {
+                            //si es asi guardamos ese concatenamos el caracter a la variable aux
+                            aux += predeterminada.charAt(i);
+                        }
                     }
-                }
 
-                //al finalizar el bucle verificamos si la variable aux es
-                //igual a la predeterminada
-                if (aux.equals(predeterminada)) {
+                    //al finalizar el bucle verificamos si la variable aux es
+                    //igual a la predeterminada
+                    if (aux.equals(predeterminada)) {
 
-                    //no hay pedo
+                        //no hay pedo
+
+                    } else {
+
+                        android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(getActivity());
+                        alerta.setMessage("Se ha cerrado la sesión actual ya que otro usuario ha accedido con tus datos en otro dispositivo.")
+                                .setCancelable(false).setIcon(R.drawable.aviso)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent intent = new Intent(getActivity(), Principal.class);
+                                        startActivity(intent);
+
+
+                                    }
+                                });
+
+                        android.app.AlertDialog titulo = alerta.create();
+                        titulo.setTitle("Aviso");
+                        titulo.show();
+
+                    }
+
 
                 } else {
 
@@ -2324,55 +2430,33 @@ public void mismoDispositivo() {
                             });
 
                     android.app.AlertDialog titulo = alerta.create();
-                    titulo.setTitle("Aviso");
-                    titulo.show();
-
-                }
-
-
-            } else {
-
-                android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(getActivity());
-                alerta.setMessage("Se ha cerrado la sesión actual ya que otro usuario ha accedido con tus datos en otro dispositivo.")
-                        .setCancelable(false).setIcon(R.drawable.aviso)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(getActivity(), Principal.class);
-                                startActivity(intent);
-
-
-                            }
-                        });
-
-                android.app.AlertDialog titulo = alerta.create();
-  //              titulo.setTitle("Aviso");
+                    //              titulo.setTitle("Aviso");
 //                titulo.show();
 
 
+                }
             }
+
         }
-
     }
-}
 
-public String getIdEmpresa(){
+    public String getIdEmpresa(){
         String id="";
-    try{
-        Statement st= conex.conexionBD().createStatement();
+        try{
+            Statement st= conex.conexionBD().createStatement();
 
-        String sql="select idEmpresa from logins where idEmpresa='"+me.getIdEmpresa()+"'";
-        ResultSet rs=st.executeQuery(sql);
+            String sql="select idEmpresa from logins where idEmpresa='"+me.getIdEmpresa()+"'";
+            ResultSet rs=st.executeQuery(sql);
 
-        while(rs.next()){
-            id=rs.getString(1);
+            while(rs.next()){
+                id=rs.getString(1);
+            }
+
+        }catch (Exception e ){
+            e.getMessage();
+            Toast.makeText(getActivity(), "No sé puede consultar el id de la empresa", Toast.LENGTH_SHORT).show();
         }
-
-    }catch (Exception e ){
-        e.getMessage();
-        Toast.makeText(getActivity(), "No sé puede consultar el id de la empresa", Toast.LENGTH_SHORT).show();
-    }
-    return id;
+        return id;
     }
 
 
@@ -2389,12 +2473,6 @@ public String getIdEmpresa(){
             }
         }catch (Exception e){
 
-            Toast toast = Toast.makeText(getActivity(), "La versión nueva de SazMobile LITE se ha instalado", Toast.LENGTH_LONG);
-            TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
-            x.setTextColor(Color.BLACK); toast.show();
-            Intent intent = new Intent(getActivity(), Principal.class);
-            getActivity().deleteDatabase("db tienda");
-            startActivity(intent);
 
         } finally {
 
@@ -2417,7 +2495,7 @@ public String getIdEmpresa(){
             ResultSet rs=st.executeQuery(sql);
 
             while(rs.next()){
-               date=rs.getString(1);
+                date=rs.getString(1);
             }
 
 
@@ -2439,9 +2517,9 @@ public String getIdEmpresa(){
         try {
             Statement st = bdc.conexionBD(me.getServer(), me.getBase(), me.getUsuario(), me.getPass()).createStatement();
             if(buscador==0){
-               sql = "select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca  where m.marca like '%"+edtBucador.getText()+"%' and a.estilo = '"+sp2.getText()+"' and  a.acabado = "+Principal.idAcabado+" and a.color="+Principal.idColor+"";
+                sql = "select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca  where m.marca like '%"+edtBucador.getText()+"%' and a.estilo = '"+sp2.getSelectedItem()+"' and  a.acabado = "+Principal.idAcabado+" and a.color="+Principal.idColor+"";
             }else if (buscador==1){
-               sql = "select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca  where m.marca like '%"+edtBucador.getText()+"%' and a.estilo = '"+sp2.getText()+"'";
+                sql = "select DISTINCT  m.marca, numero from marcas m inner join articulo a on m.numero = a.marca  where m.marca like '%"+edtBucador.getText()+"%' and a.estilo = '"+sp2.getSelectedItem()+"'";
             }
 
             ResultSet rs = st.executeQuery(sql);
@@ -2463,4 +2541,40 @@ public String getIdEmpresa(){
     }
 
 
+    public void inicializarMarca() {
+        try {
+            listaMarca.clear();
+            listaCorrida.clear();
+            puntos.clear();
+
+
+            spCorrida.setAdapter(null);
+            punto.setAdapter(null);
+            limpiarCajas();
+
+            ReinicarContadores();
+
+            contarSp4();
+            if (Principal.scannPass == true) {
+                llenarSp4();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                spMarca.setAdapter(adapter);
+                spMarca.setSelection(obtenerPosicionItem(spMarca, marcaBar));
+            } else if (Principal.scannPass == false && marcaCantidad == 1) {
+                llenarSp4();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                spMarca.setAdapter(adapter);
+                spMarca.setSelection(1);
+
+
+            } else if (Principal.scannPass == false && marcaCantidad > 1) {
+                llenarSp4();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
+                spMarca.setAdapter(adapter);
+
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
 }

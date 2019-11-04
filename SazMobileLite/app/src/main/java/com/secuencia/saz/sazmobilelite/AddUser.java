@@ -96,12 +96,8 @@ public class AddUser extends Fragment {
 
             if(entrada!=null) {
                 if (predeterminada.length() == entrada.length()) {
-
                     for (int i = 0; i < predeterminada.length(); i++) {
-
-
                         if (predeterminada.charAt(i) == entrada.charAt(i)) {
-
                             aux += predeterminada.charAt(i);
                         }
                     }
@@ -140,8 +136,6 @@ public class AddUser extends Fragment {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             String sql="INSERT INTO empleado (nombre, [user],[PASSWORD], [status], id) values ('"+nombre.getText()+"','"+correo.getText()+"','"+contraseña.getText()+"',0,"+id+");";
             st.executeUpdate(sql);
-
-
         } catch (Exception e) {
             Toast.makeText(getActivity(), "Error al verificar la contraseña", Toast.LENGTH_SHORT).show();
         }                 }

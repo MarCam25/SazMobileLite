@@ -59,20 +59,25 @@ public class Tiendas extends AppCompatActivity {
 
             Statement st = bdc.conexionBD(me.getServer(), me.getBase(), me.getUsuario(), me.getPass()).createStatement();
 
-            String sql = "lupita '"+barcode+"',"+puntoSp+",0;";
+            String sql = "lupitaApartados'"+barcode+"',"+puntoSp+",0,''";
             ResultSet rs=st.executeQuery(sql);
 
             while(rs.next()){
                 lupita=new Lupita();
-                String tienda=rs.getString(1);
-                String punto=rs.getString(2);
-                lupita.setTienda(tienda);
-                lupita.setPunto(punto);
-                listaLupita.add(lupita);
+                int validar = rs.getInt(2);
+                if(validar>0) {
+                    String tienda = rs.getString(1);
+                    String punto = rs.getString(2);
+                    lupita.setTienda(tienda);
+                    lupita.setPunto(punto);
+                    listaLupita.add(lupita);
+                }
+
 
             }
 
 
+            st.close();
 
         } catch (SQLException e){
             e.getMessage();

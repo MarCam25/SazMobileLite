@@ -87,7 +87,8 @@ public class Utilidades {
     public static final String TABLA_CHECKB="checkBuscador";
     public static final String CAMPO_IDCHECKB="id";
     public static final String CAMPO_BUSCADOR="buscador";
-    public static final String CREAR_TABLA_CHECKB="CREATE TABLE "+TABLA_CHECKB+"( "+CAMPO_IDCHECKB+" INTEGER PRIMARY KEY AUTOINCREMENT,"+CAMPO_BUSCADOR+" TEXT )";
+    public static final String CAMPO_BUSCADOR2="buscador2";
+    public static final String CREAR_TABLA_CHECKB="CREATE TABLE "+TABLA_CHECKB+"( "+CAMPO_IDCHECKB+" INTEGER PRIMARY KEY AUTOINCREMENT,"+CAMPO_BUSCADOR+" TEXT,"+CAMPO_BUSCADOR2+" TEXT  )";
 
 
     public static final String TABLA_SIMILAR="similar";

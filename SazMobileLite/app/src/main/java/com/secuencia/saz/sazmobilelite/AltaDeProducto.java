@@ -52,6 +52,7 @@ public class AltaDeProducto extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alta_de_producto);
 
+
     }
 
 

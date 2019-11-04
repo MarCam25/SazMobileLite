@@ -22,14 +22,14 @@ public class Detalle extends AppCompatActivity {
     String style, valores, numero, marca, id;
     String [] separado;
     String idImagen;
-    TextView imagen;
-    String foto;
+
     ImageView imagenView;
 
     String empress;
     ModeloEmpresa me=new ModeloEmpresa();
     ConexionBDCliente bdc=new ConexionBDCliente();
     ConexionSqlServer conex=new ConexionSqlServer();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +43,7 @@ public class Detalle extends AppCompatActivity {
         marca=separado[3];
         empress=separado[4];
         obtenerLineaConexion();
+
 
 
         Toast.makeText(getApplicationContext(), ""+valores, Toast.LENGTH_SHORT).show();
@@ -99,22 +100,25 @@ public class Detalle extends AppCompatActivity {
 
                 }
 
-                // Toast.makeText(Principal.this,"Inicio de sesion Exitosa...!!!: " + empresa, Toast.LENGTH_LONG).show();
+
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), "Error en la linea de conexion", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
+
     public void llenarTabla(){
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            ResultSet rs = st.executeQuery("select a.estilo,c.color,ac.acabado,ma.marca, l.linea,sl.sublinea,t.temporad,a.Descri,a.EstChar,a.LP,p.Nombre as Proveedor,a.PAGINA,a.basico,e.nombre as comprador,d.departamento,ta.tacon,pl.plantilla,f.forro,a.clasific,co.Nombre as Corrida,Su.suela,a.ubica,a.BARCODE,co.inicial,co.final,co.incremento,im.id \n" +
-                    " from articulo a inner join lineas l on a.LINEA=l.NUMERO inner join sublinea sl on a.SUBLINEA=sl.NUMERO inner join temporad t on a.TEMPORAD=t.NUMERO\n" +
-                    "  inner join proveed p on a.PROVEED=p.numero\n" +
-                    "  left join empleado e on a.comprador=e.numero inner join departamentos d on a.DEPARTAMENTO=d.NUMERO\n" +
-                    "  inner join tacones ta on a.TACON=ta.NUMERO inner join plantillas pl on a.PLANTILLA=pl.NUMERO inner join forros f on a.FORRO=f.NUMERO \n" +
-                    "  inner join corridas co on a.corrida=co.id inner join suelas su on a.SUELA=su.numero inner join colores c on a.color = c.numero\n" +
-                    "  inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO inner join imagenes im on a.id = im.id where a.estilo = '"+style+"'  and a.marca = "+marca+"");
+            String sql="  select a.estilo,c.color,ac.acabado,ma.marca, l.linea,sl.sublinea,t.temporad,a.Descri,a.EstChar,a.LP,p.Nombre as Proveedor,a.PAGINA,a.basico,e.nombre as comprador,d.departamento,ta.tacon,pl.plantilla,f.forro,a.clasific,co.Nombre as Corrida,Su.suela,a.ubica,a.BARCODE,co.inicial,co.final,co.incremento,im.id\n" +
+                    "                   from articulo a inner join lineas l on a.LINEA=l.NUMERO inner join sublinea sl on a.SUBLINEA=sl.NUMERO inner join temporad t on a.TEMPORAD=t.NUMERO\n" +
+                    "                     inner join proveed p on a.PROVEED=p.numero\n" +
+                    "                     left join empleado e on a.comprador=e.numero inner join departamentos d on a.DEPARTAMENTO=d.NUMERO\n" +
+                    "                     inner join tacones ta on a.TACON=ta.NUMERO inner join plantillas pl on a.PLANTILLA=pl.NUMERO inner join forros f on a.FORRO=f.NUMERO\n" +
+                    "                     inner join corridas co on a.corrida=co.id inner join suelas su on a.SUELA=su.numero inner join colores c on a.color = c.numero\n" +
+                    "                     inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id = im.id   where a.estilo = '"+style+"' and a.color="+Principal.idColor+" and a.acabado="+Principal.idAcabado+"  and a.marca ="+marca+" and a.corrida="+Principal.idCorrida+"";
+            ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
 
@@ -148,10 +152,12 @@ public class Detalle extends AppCompatActivity {
             }
 
         } catch (Exception e) {
+            e.getMessage();
             Toast.makeText(getApplicationContext(), "Error en llenar la lista", Toast.LENGTH_SHORT).show();
         }
 
     }
+
 
     public void getImagen(){
 

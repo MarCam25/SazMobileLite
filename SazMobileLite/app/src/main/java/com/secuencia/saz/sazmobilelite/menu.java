@@ -74,7 +74,11 @@ public class menu extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         usuario= getIntent().getStringExtra("Usuario");
         getSupportActionBar().setTitle("SazMobile Lite -Existencias-");
-        if(Principal.passConsulta==true) {
+
+        if(Principal.busqueda2==true){
+            fm.beginTransaction().replace(R.id.contenedorMenu, new ConusltaMarca()).commit();
+        }else if(Principal.passConsulta==true) {
+            Principal.passConsulta=false;
             fm.beginTransaction().replace(R.id.contenedorMenu, new ConsultaF()).commit();
         }
         //  Intent  intent= new Intent(getApplicationContext(), Hamburguesa.class);
@@ -99,21 +103,7 @@ public class menu extends AppCompatActivity
 
         getSupportActionBar().setTitle("SazMobile Lite App -Inicio-");
 
-        if(Principal.location==1){
-            getSupportActionBar().setTitle("Comandero");
-            fm.beginTransaction().replace(R.id.contenedorMenu, new Coman()).commit();
-            Principal.location=0;
-        }else if(Principal.location==2){
-            getSupportActionBar().setTitle("Venta");
-            fm.beginTransaction().replace(R.id.contenedorMenu, new Venta()).commit();
-            Principal.location=0;
 
-        }else if(Principal.location==3){
-            getSupportActionBar().setTitle("Configuración");
-            fm.beginTransaction().replace(R.id.contenedorMenu, new Configuracion()).commit();
-            Principal.location=0;
-
-        }
     }
 
 
@@ -281,11 +271,13 @@ public class menu extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
 
-            fm.beginTransaction().replace(R.id.contenedorMenu, new ConsultaF()).commit();
+                Principal.passConsulta=false;
+                fm.beginTransaction().replace(R.id.contenedorMenu, new ConsultaF()).commit();
+
            // startActivity(intent);
-        } else if (id == R.id.generales) {
+        } else if (id == R.id.nav_vender) {
 
-
+            fm.beginTransaction().replace(R.id.contenedorMenu, new ConusltaMarca()).commit();
 
         } else if (id == R.id.nav_manage) {
           //  getSupportActionBar().setTitle("Comandero");
@@ -334,7 +326,7 @@ public class menu extends AppCompatActivity
             cursor.close();
 
         }catch (Exception e){
-            Toast.makeText(this,"error No.45" , Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Error al iniciar sesión, cierra la sesión y vuelve a intentarlo" , Toast.LENGTH_LONG).show();
         }
 
     }

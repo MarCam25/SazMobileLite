@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -28,6 +30,7 @@ import com.secuencia.saz.sazmobilelite.Modelo.ModeloUsuario;
 import com.secuencia.saz.sazmobilelite.conexion.ConexionBDCliente;
 import com.secuencia.saz.sazmobilelite.conexion.ConexionSQLiteHelper;
 import com.secuencia.saz.sazmobilelite.conexion.ConexionSqlServer;
+import com.secuencia.saz.sazmobilelite.utilidades.Utilidades;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,12 +50,14 @@ import static android.Manifest.permission.CAMERA;
 public class Principal extends AppCompatActivity {
 
     Button button;
-    EditText des, en;
+    EditText edtContraseña, edtCorreo;
     public String res;
     public static Boolean similarPass=false;
 
     public static  boolean scannPass=false;
     public static boolean passConsulta=false;
+    public static boolean busqueda2=false;
+    public static String punto="";
     public static int location = 0;
     CheckBox check;
     public RequestQueue queue;
@@ -60,7 +65,7 @@ public class Principal extends AppCompatActivity {
     Boolean mensaje=false;
     String asistencia;
     int checkDisp=0;
-    public static int hiloCantidad = 0, hiloCantidadC = 0;
+    public static int hiloCantidad = 0;
     String fechaContrato;
     String pass = " ";
     int verificador;
@@ -71,7 +76,8 @@ public class Principal extends AppCompatActivity {
     int filas=0;
     Boolean membrecia=false;
 
-    Calendar calendar = Calendar.getInstance();
+    public static String idCorrida=null, idAcabado=null,idColor=null;
+
     String nombreUsuario;
     ModeloEmpresa me;
     ModeloUsuario mu;
@@ -85,12 +91,18 @@ public class Principal extends AppCompatActivity {
         setContentView(R.layout.activity_principal);
 
         check = (CheckBox) findViewById(R.id.check);
-        des = (EditText) findViewById(R.id.des);
-        en = (EditText) findViewById(R.id.en);
+
+        edtContraseña = (EditText) findViewById(R.id.edtContraseña);
+        edtCorreo = (EditText) findViewById(R.id.edtCorreo);
+
+
+
         button = (Button) findViewById(R.id.button);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddhhmmss", Locale.getDefault());
 
-        //this.deleteDatabase("db tienda");
+       //this.deleteDatabase("db tienda");
+
+        consultarBuscador();
 
         Date date=new Date();
        fechaHoy=dateFormat.format(date);
@@ -128,67 +140,243 @@ public class Principal extends AppCompatActivity {
 
     public void consulta()
     {
+        try {
+            final String url = "http://secuenciaonline.com/svcCadEncrypt/cadEncrypt.svc/encjson/" + pass;
 
-        final String url = "http://secuenciaonline.com/svcCadEncrypt/cadEncrypt.svc/encjson/" + pass;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    Password = response.get("EncriptaJSONResult").toString();
-
-
-                    Statement st = conex.conexionBD().createStatement();
-                    String query = "select  Empresa from Rlogin where Usuario= '" + usuario + "' and Clave= '" + Password + "' and Activo=1 and suspendido=0";
-                    ResultSet rs = st.executeQuery(query);
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Password = response.get("EncriptaJSONResult").toString();
 
 
-                    while (rs.next()) {
-                        empresa = (rs.getString(1));
-                        obtenerLineaConexion();
-                        getIdUsuario();
-                        asistencia();
+                        Statement st = conex.conexionBD().createStatement();
+                        String query = "select  Empresa from Rlogin where Usuario= '" + usuario + "' and Clave= '" + Password + "' and Activo=1 and suspendido=0";
+                        ResultSet rs = st.executeQuery(query);
 
 
-                        if (!empresa.isEmpty()) {
+                        while (rs.next()) {
+                            empresa = (rs.getString(1));
+                            obtenerLineaConexion();
+                            getIdUsuario();
+                            asistencia();
 
-                            String predeterminada = "SALIDA";
 
-                            //declaramos una palabra de entrada
-                            String entrada = asistencia;
+                            if (!empresa.isEmpty()) {
 
-                            //variable usada para verificar si las palabras son iguales
-                            String aux = "";
+                                String predeterminada = "SALIDA";
 
-                            //se verifica que ambas palabras tengan la misma longitud
-                            //si no es asi no se pueden comparar
-                            if (asistencia != null) {
-                                if (predeterminada.length() == entrada.length()) {
 
-                                    for (int i = 0; i < predeterminada.length(); i++) {
+                                String entrada = asistencia;
 
-                                        //verificamos si el primer caracter de predeterminada
-                                        //es igual al primero de entrada
-                                        if (predeterminada.charAt(i) == entrada.charAt(i)) {
-                                            //si es asi guardamos ese concatenamos el caracter a la variable aux
-                                            aux += predeterminada.charAt(i);
+                                String aux = "";
+
+
+                                if (asistencia != null) {
+                                    if (predeterminada.length() == entrada.length()) {
+
+                                        for (int i = 0; i < predeterminada.length(); i++) {
+
+
+                                            if (predeterminada.charAt(i) == entrada.charAt(i)) {
+
+                                                aux += predeterminada.charAt(i);
+                                            }
                                         }
-                                    }
 
-                                    //al finalizar el bucle verificamos si la variable aux es
-                                    //igual a la predeterminada
-                                    if (aux.equals(predeterminada)) {
+
+                                        if (aux.equals(predeterminada)) {
+                                            verificar();
+                                            verificarRenta();
+
+                                            if (fechaContrato != null) {
+                                                compararFechaReta();
+                                            }
+
+
+                                            if (verificador == 1 && membrecia == true) {
+                                                mismoDispositivo();
+
+                                                if (check.isChecked() == true) {
+                                                    recordarDatos(usuario, pass);
+                                                } else if (check.isChecked() == false) {
+                                                    noRecordar();
+                                                }
+
+                                                setDateDivice();
+                                                checkDispositivo();
+                                                if (checkDisp > 0) {
+                                                    updateDispositivo();
+
+                                                } else if (checkDisp == 0) {
+                                                    DispositivoActual();
+                                                }
+
+                                                compararFechaReta();
+                                                if (mensaje == true) {
+                                                    android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
+                                                    alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
+                                                            .setCancelable(false).setIcon(R.drawable.aviso)
+                                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
+                                                                    // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
+                                                                    Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
+                                                                    intent.putExtra("Empresa", empresa);
+                                                                    intent.putExtra("Usuario", usuario);
+                                                                    startActivity(intent);
+
+                                                                }
+                                                            });
+
+                                                    android.app.AlertDialog titulo = alerta.create();
+                                                  //  titulo.setTitle("Aviso");
+                                                  //   titulo.show();
+
+
+                                                } else {
+                                                    Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
+                                                    intent.putExtra("Empresa", empresa);
+                                                    intent.putExtra("Usuario", usuario);
+                                                    startActivity(intent);
+                                                }
+
+
+                                            } else if (filas == 0) {
+                                                iniciarPrueba();
+                                                consulta();
+
+                                            }  else if(verificador==0 && membrecia==true) {
+
+                                                AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                                dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
+                                                dialogo.setMessage("Este usuario se encuentra inactivo favor de contactarte con ayuda");
+
+                                                dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+
+
+                                                    }
+                                                });
+
+                                                dialogo.show();
+                                            }else {
+                                                AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                                dialogo.setTitle("Aviso");
+                                                dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
+
+                                                dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+
+
+                                                    }
+                                                });
+
+                                                dialogo.show();
+                                            }
+                                        } else {
+                                            verificar();
+                                            verificarRenta();
+                                            if (fechaContrato != null) {
+                                                compararFechaReta();
+                                            }
+
+                                            if (verificador == 1 && membrecia == true) {
+                                                mismoDispositivo();
+                                                // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
+
+                                                if (check.getLinksClickable() == true) {
+                                                    recordarDatos(usuario, pass);
+                                                } else if (check.getLinksClickable() == false) {
+                                                    noRecordar();
+                                                }
+                                                setDateDivice();
+                                                checkDispositivo();
+                                                if (checkDisp > 0) {
+                                                    updateDispositivo();
+
+                                                } else if (checkDisp == 0) {
+                                                    DispositivoActual();
+                                                }
+                                                compararFechaReta();
+                                                if (mensaje == true) {
+                                                    android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
+                                                    alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
+                                                            .setCancelable(false).setIcon(R.drawable.aviso)
+                                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
+                                                                    // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
+                                                                    Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
+                                                                    intent.putExtra("Empresa", empresa);
+                                                                    intent.putExtra("Usuario", usuario);
+                                                                    startActivity(intent);
+
+                                                                }
+                                                            });
+
+                                                    android.app.AlertDialog titulo = alerta.create();
+                                                    titulo.setTitle("Aviso");
+                                                    titulo.show();
+
+
+                                                } else {
+                                                    Intent intent = new Intent(getApplicationContext(), menu.class);
+                                                    intent.putExtra("Empresa", empresa);
+                                                    intent.putExtra("Usuario", usuario);
+                                                    startActivity(intent);
+                                                }
+
+
+                                            } else if (filas == 0) {
+                                                iniciarPrueba();
+                                                consulta();
+
+                                            }  else if(verificador==0 && membrecia==true) {
+
+                                                AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                                dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
+                                                dialogo.setMessage("Este usuario se encuentra inactivo favor de contactarte con ayuda");
+
+                                                dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+
+
+                                                    }
+                                                });
+
+                                                dialogo.show();
+                                            }else {
+                                                AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                                dialogo.setTitle("Upss :(");
+                                                dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
+
+                                                dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+
+
+                                                    }
+                                                });
+
+                                                dialogo.show();
+                                            }
+
+                                        }
+
+
+                                    } else {
                                         verificar();
                                         verificarRenta();
-
-                                        if(fechaContrato!=null){
+                                        if (fechaContrato != null) {
                                             compararFechaReta();
                                         }
-
-
-
-
-                                        if (verificador == 1 && membrecia==true ) {
+                                        if (verificador == 1 && membrecia == true) {
                                             mismoDispositivo();
 
                                             if (check.isChecked() == true) {
@@ -196,92 +384,16 @@ public class Principal extends AppCompatActivity {
                                             } else if (check.isChecked() == false) {
                                                 noRecordar();
                                             }
-
-                                                setDateDivice();
-                                            checkDispositivo();
-                                            if(checkDisp>0){
-                                                updateDispositivo();
-
-                                            }else if(checkDisp==0){
-                                                DispositivoActual();
-                                            }
-
-                                            compararFechaReta();
-                                            if(mensaje==true){
-                                                android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
-                                                alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
-                                                        .setCancelable(false).setIcon(R.drawable.aviso)
-                                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialog, int which) {
-                                                                Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
-                                                                // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
-                                                                Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
-                                                                intent.putExtra("Empresa", empresa);
-                                                                intent.putExtra("Usuario", usuario);
-                                                                startActivity(intent);
-
-                                                                }
-                                                        });
-
-                                                android.app.AlertDialog titulo=alerta.create();
-                                                titulo.setTitle("Aviso");
-                                                titulo.show();
-
-
-                                            }else{
-                                                Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
-                                                intent.putExtra("Empresa", empresa);
-                                                intent.putExtra("Usuario", usuario);
-                                                startActivity(intent);
-                                            }
-
-
-                                        } else if (filas == 0) {
-                                            iniciarPrueba();
-                                            consulta();
-
-                                        }else{
-                                            AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
-                                            dialogo.setTitle("Upss :(");
-                                            dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
-
-                                            dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-
-
-                                                }
-                                            });
-
-                                            dialogo.show();
-                                        }
-                                    } else {
-                                        verificar();
-                                        verificarRenta();
-                                        if(fechaContrato!=null){
-                                            compararFechaReta();
-                                        }
-
-                                        if (verificador == 1 && membrecia==true ) {
-                                            mismoDispositivo();
-                                            // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
-
-                                            if (check.getLinksClickable() == true) {
-                                                recordarDatos(usuario, pass);
-                                            } else if (check.getLinksClickable() == false) {
-                                                noRecordar();
-                                            }
                                             setDateDivice();
                                             checkDispositivo();
-                                            if(checkDisp>0){
+                                            if (checkDisp > 0) {
                                                 updateDispositivo();
+                                            } else if (checkDisp == 0) {
 
-                                            }else if(checkDisp==0){
                                                 DispositivoActual();
                                             }
                                             compararFechaReta();
-                                            if(mensaje==true){
+                                            if (mensaje == true) {
                                                 android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
                                                 alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
                                                         .setCancelable(false).setIcon(R.drawable.aviso)
@@ -298,26 +410,40 @@ public class Principal extends AppCompatActivity {
                                                             }
                                                         });
 
-                                                android.app.AlertDialog titulo=alerta.create();
+                                                android.app.AlertDialog titulo = alerta.create();
                                                 titulo.setTitle("Aviso");
                                                 titulo.show();
 
 
-                                            }else{
+                                            } else {
                                                 Intent intent = new Intent(getApplicationContext(), menu.class);
                                                 intent.putExtra("Empresa", empresa);
                                                 intent.putExtra("Usuario", usuario);
                                                 startActivity(intent);
                                             }
 
-
-                                        }  else if (filas == 0) {
+                                        } else if (filas == 0) {
                                             iniciarPrueba();
                                             consulta();
 
-                                        }else{
+                                        }  else if(verificador==0 && membrecia==true) {
+
                                             AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
-                                            dialogo.setTitle("Upss :(");
+                                            dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
+                                            dialogo.setMessage("Este usuario se encuentra inactivo favor de contactarte con ayuda");
+
+                                            dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+
+
+                                                }
+                                            });
+
+                                            dialogo.show();
+                                        }else {
+                                            AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                            dialogo.setTitle("Upss :(").setIcon(R.drawable.aviso);
                                             dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
 
                                             dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
@@ -330,34 +456,34 @@ public class Principal extends AppCompatActivity {
 
                                             dialogo.show();
                                         }
-
                                     }
-
-
                                 } else {
                                     verificar();
                                     verificarRenta();
-                                    if(fechaContrato!=null){
+                                    if (fechaContrato != null) {
                                         compararFechaReta();
                                     }
-                                    if (verificador == 1 && membrecia==true ) {
+                                    if (verificador == 1 && membrecia == true) {
                                         mismoDispositivo();
+                                        Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
+                                        // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
 
                                         if (check.isChecked() == true) {
                                             recordarDatos(usuario, pass);
                                         } else if (check.isChecked() == false) {
                                             noRecordar();
+
                                         }
                                         setDateDivice();
                                         checkDispositivo();
-                                        if(checkDisp>0){
+                                        if (checkDisp > 0) {
                                             updateDispositivo();
-                                        }else if(checkDisp==0){
+                                        } else if (checkDisp == 0) {
 
                                             DispositivoActual();
                                         }
                                         compararFechaReta();
-                                        if(mensaje==true){
+                                        if (mensaje == true) {
                                             android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
                                             alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
                                                     .setCancelable(false).setIcon(R.drawable.aviso)
@@ -374,25 +500,42 @@ public class Principal extends AppCompatActivity {
                                                         }
                                                     });
 
-                                            android.app.AlertDialog titulo=alerta.create();
+                                            android.app.AlertDialog titulo = alerta.create();
                                             titulo.setTitle("Aviso");
                                             titulo.show();
 
 
-                                        }else{
-                                            Intent intent = new Intent(getApplicationContext(), menu.class);
+                                        } else {
+                                            Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
                                             intent.putExtra("Empresa", empresa);
                                             intent.putExtra("Usuario", usuario);
                                             startActivity(intent);
                                         }
 
-                                    }  else if (filas == 0) {
+                                    } else if (filas == 0) {
                                         iniciarPrueba();
                                         consulta();
 
-                                    }else{
+                                    } else if(verificador==0 && membrecia==true) {
+
                                         AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
-                                        dialogo.setTitle("Upss :(").setIcon(R.drawable.aviso);
+                                        dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
+                                        dialogo.setMessage("Este usuario se encuentra inactivo favor de contactarte con ayuda");
+
+                                        dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+
+                                            }
+                                        });
+
+                                        dialogo.show();
+                                    }else {
+
+
+                                        AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
+                                        dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
                                         dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
 
                                         dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
@@ -406,111 +549,38 @@ public class Principal extends AppCompatActivity {
                                         dialogo.show();
                                     }
                                 }
-                            } else {
-                                verificar();
-                                verificarRenta();
-                                if(fechaContrato!=null){
-                                    compararFechaReta();
-                                }
-                                if (verificador == 1 && membrecia==true ) {
-                                    mismoDispositivo();
-                                    Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
-                                    // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
 
-                                    if (check.isChecked() == true) {
-                                        recordarDatos(usuario, pass);
-                                    } else if (check.isChecked() == false) {
-                                        noRecordar();
-
-                                    }
-                                    setDateDivice();
-                                    checkDispositivo();
-                                    if(checkDisp>0){
-                                        updateDispositivo();
-                                    }else if(checkDisp==0){
-
-                                        DispositivoActual();
-                                    }
-                                    compararFechaReta();
-                                    if(mensaje==true){
-                                        android.app.AlertDialog.Builder alerta = new android.app.AlertDialog.Builder(Principal.this);
-                                        alerta.setMessage("Este usuario estaba siendo usado en otro dispositivo por lo que se cerrará la sesión anterior.")
-                                                .setCancelable(false).setIcon(R.drawable.aviso)
-                                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        Toast.makeText(Principal.this, "Bienvenido", Toast.LENGTH_LONG).show();
-                                                        // Toast.makeText(Principal.this,"Bienvenido", Toast.LENGTH_LONG).show();
-                                                        Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
-                                                        intent.putExtra("Empresa", empresa);
-                                                        intent.putExtra("Usuario", usuario);
-                                                        startActivity(intent);
-
-                                                    }
-                                                });
-
-                                        android.app.AlertDialog titulo=alerta.create();
-                                        titulo.setTitle("Aviso");
-                                        titulo.show();
-
-
-                                    }else{
-                                        Intent intent = new Intent(getApplicationContext(), ActPrincipal.class);
-                                        intent.putExtra("Empresa", empresa);
-                                        intent.putExtra("Usuario", usuario);
-                                        startActivity(intent);
-                                    }
-
-                                }  else if (filas == 0) {
-                                    iniciarPrueba();
-                                    consulta();
-
-                                }else{
-
-                                    AlertDialog.Builder dialogo = new AlertDialog.Builder(Principal.this);
-                                    dialogo.setTitle("Aviso ").setIcon(R.drawable.aviso);
-                                    dialogo.setMessage("Tu periodo de prueba ha expirado o ha sido suspendido por falta de pago , Comunicate con saz para ReConectar");
-
-                                    dialogo.setPositiveButton("ACEPTAR", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-
-
-                                        }
-                                    });
-
-                                    dialogo.show();
-                                }
                             }
 
                         }
 
+                        if (empresa == null) {
+                            Toast.makeText(Principal.this, "Error verifica tus datos....!!!", Toast.LENGTH_LONG).show();
+
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(Principal.this, "Error", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        Toast.makeText(Principal.this, " Error...!!! Verifica tus Datos ", Toast.LENGTH_LONG).show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
+                }
+            }, new Response.ErrorListener() {
+                @Override//Obtiene el error al no encontrar el resultado que se pide
+                public void onErrorResponse(VolleyError error) {
 
-                    if (empresa == null) {
-                        Toast.makeText(Principal.this, "Error verifica tus datos....!!!", Toast.LENGTH_LONG).show();
-
-                    }
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(Principal.this, "Error", Toast.LENGTH_LONG).show();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    Toast.makeText(Principal.this, " Error...!!! Verifica tus Datos ", Toast.LENGTH_LONG).show();
-                } catch (ParseException e) {
-                    e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override//Obtiene el error al no encontrar el resultado que se pide
-            public void onErrorResponse(VolleyError error) {
-
-            }
+            );
+            queue.add(request);
+        }catch (Exception e){
+            Toast.makeText(getApplicationContext(),"Hay un problema con la conexion",Toast.LENGTH_LONG).show();
         }
-        );
-        queue.add(request);
     }
 
     public void noRecordar() {
@@ -524,8 +594,8 @@ public class Principal extends AppCompatActivity {
     }
 
     public void inicializarDatos() {
-        pass = String.valueOf(des.getText());
-        usuario = en.getText().toString();
+        pass = String.valueOf(edtContraseña.getText());
+        usuario = edtCorreo.getText().toString();
     }
 
     public void obtenerLineaConexion() {
@@ -640,7 +710,7 @@ public class Principal extends AppCompatActivity {
 
         try {
             Statement st = bdc.conexionBD(me.getServer(), me.getBase(), me.getUsuario(), me.getPass()).createStatement();
-            String query = "select numero, nombre from empleado where [user]='" + en.getText() + "'";
+            String query = "select numero, nombre from empleado where [user]='" + edtCorreo.getText() + "'";
             ResultSet rs = st.executeQuery(query);
 
 
@@ -651,7 +721,7 @@ public class Principal extends AppCompatActivity {
                 nombreUsuario = rs.getString(2);
 
 
-                mu.setCorreo(en.getText().toString());
+                mu.setCorreo(edtCorreo.getText().toString());
                 mu.setNombre(nombreUsuario);
             }
 
@@ -677,8 +747,8 @@ public class Principal extends AppCompatActivity {
             String contra = cursor.getString(1);
 
             if (!usu.isEmpty()) {
-                en.setText(usu);
-                des.setText(contra);
+                edtCorreo.setText(usu);
+                edtContraseña.setText(contra);
                 check.setChecked(true);
             }
 
@@ -935,37 +1005,27 @@ public void updateDispositivo(){
 
             String predeterminada = dispositivo;
 
-            //declaramos una palabra de entrada
             String entrada = marca+"-"+serie+"-"+modelo;
 
-            //variable usada para verificar si las palabras son iguales
             String aux = "";
 
-            //se verifica que ambas palabras tengan la misma longitud
-            //si no es asi no se pueden comparar
+
             if (entrada!= null) {
                 if (predeterminada.length() == entrada.length()) {
 
                     for (int i = 0; i < predeterminada.length(); i++) {
 
-                        //verificamos si el primer caracter de predeterminada
-                        //es igual al primero de entrada
+
                         if (predeterminada.charAt(i) == entrada.charAt(i)) {
-                            //si es asi guardamos ese concatenamos el caracter a la variable aux
+
                             aux += predeterminada.charAt(i);
                         }
                     }
 
-                    //al finalizar el bucle verificamos si la variable aux es
-                    //igual a la predeterminada
+
                     if (aux.equals(predeterminada)) {
 
-
                             mensaje=false;
-
-
-
-
 
 
                     } else {
@@ -976,10 +1036,7 @@ public void updateDispositivo(){
                             mensaje=false;
                         }
 
-
-
                     }
-
 
                 } else {
 
@@ -998,7 +1055,35 @@ public void updateDispositivo(){
     }
 
 
+    public void consultarBuscador(){
+        int buscador=0;
+        try {
+            ConexionSQLiteHelper conn = new ConexionSQLiteHelper(getApplicationContext(), "db tienda", null, 1);
+            SQLiteDatabase db = conn.getReadableDatabase();
 
+            String sql="SELECT "+ Utilidades.CAMPO_BUSCADOR2+" FROM "+Utilidades.TABLA_CHECKB;
+            Cursor cursor = db.rawQuery(sql, null);
+            while (cursor.moveToNext()) {
+                buscador= Integer.parseInt(cursor.getString(0));
+            }
+
+            if(buscador==1){
+                busqueda2=true;
+            }
+        }catch (Exception e){
+
+            Toast toast = Toast.makeText(getApplicationContext(), "La versión nueva de SazMobile LITE se ha instalado", Toast.LENGTH_LONG);
+            TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
+            x.setTextColor(Color.BLACK); toast.show();
+            Intent intent = new Intent(getApplicationContext(), Principal.class);
+            getApplicationContext().deleteDatabase("db tienda");
+            startActivity(intent);
+
+        } finally {
+
+        }
+
+    }
 }
 
 

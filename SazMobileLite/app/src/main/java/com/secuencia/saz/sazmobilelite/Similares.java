@@ -33,7 +33,7 @@ public class Similares extends AppCompatActivity {
     ArrayList<ModeloSimilar> listaSimilar;
     RecyclerView recyclerView;
     String tienda;
-
+    String where=" where ";
 
 
 
@@ -59,18 +59,18 @@ public class Similares extends AppCompatActivity {
 
 
 
-    public void getSimilares(String marca, String temporada, String clasificacion, String sublinea, String suela, String tacon, String color, String acabado, String corrida){
+    public void getSimilares(){
         try {
             String validar=null;
             ModeloSimilar similar=null;
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select DISTINCT a.estilo,ac.acabado, c.COLOR, ma.MARCA, ex.TALLA, a.BARCODE,co.Nombre \n" +
+             String sql="select DISTINCT a.estilo,ac.acabado, c.COLOR, ma.MARCA, ex.TALLA, a.BARCODE,co.Nombre \n" +
                     " from articulo a inner join lineas l on a.LINEA=l.NUMERO inner join sublinea sl on a.SUBLINEA=sl.NUMERO inner join temporad t on a.TEMPORAD=t.NUMERO\n" +
                     "  inner join proveed p on a.PROVEED=p.numero\n" +
                     "  left join empleado e on a.comprador=e.numero inner join departamentos d on a.DEPARTAMENTO=d.NUMERO\n" +
                     "  inner join tacones ta on a.TACON=ta.NUMERO inner join plantillas pl on a.PLANTILLA=pl.NUMERO inner join forros f on a.FORRO=f.NUMERO \n" +
                     "  inner join corridas co on a.corrida=co.id inner join suelas su on a.SUELA=su.numero inner join colores c on a.color = c.numero\n" +
-                    "  inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id=im.id inner join clasific clas on a.CLASIFIC=clas.numero inner join existen ex on a.barcode = ex.barcode and ex.CANTIDAD>0  where a.marca"+marca+" and a.temporad"+temporada+" and a.clasific"+clasificacion+" and  a.sublinea"+sublinea+" and a.suela"+suela+" and a.tacon"+tacon+" and a.color"+color+" and a.acabado"+acabado+" and a.corrida"+corrida;
+                    "  inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id=im.id inner join clasific clas on a.CLASIFIC=clas.numero inner join existen ex on a.barcode = ex.barcode and ex.CANTIDAD>0"+where+ " and ex.Tienda="+tienda+" and talla="+Principal.punto;
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -95,13 +95,17 @@ public class Similares extends AppCompatActivity {
                 Toast toast = Toast.makeText(getApplication(), "Este producto no cuenta con similares", Toast.LENGTH_LONG);
                 TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
                 x.setTextColor(Color.YELLOW); toast.show();
+
             }
 
         } catch (SQLException xe) {
             xe.getMessage();
+            Toast.makeText(getApplicationContext(),"No tienes configurados los similares",Toast.LENGTH_LONG).show();
 
         }
     }
+
+
 
     public void ultimaVez(){
         ConexionSQLiteHelper conn = new ConexionSQLiteHelper(this, "db tienda", null, 1);
@@ -118,9 +122,8 @@ public class Similares extends AppCompatActivity {
 
 
     public void consultarSimilares(){
+        where=" WHERE ";
         int marca=0,  temporada=0, clasificacion=0,  sublinea=0, suela=0,  tacon=0,  color=0,  acabado=0,  corrida=0;
-        String marcaS=">0",  temporadaS=">0", clasificacionS=">0",  sublineaS=">0", suelaS=">0",  taconS=">0",  colorS=">0",  acabadoS=">0",  corridaS=">0";
-
         ConexionSQLiteHelper conn = new ConexionSQLiteHelper(this, "db tienda", null, 1);
         SQLiteDatabase db = conn.getReadableDatabase();
 
@@ -139,43 +142,89 @@ public class Similares extends AppCompatActivity {
             corrida=cursor.getInt(9);
         }
 
+
+
+            if(temporada==0 && clasificacion==0 && sublinea==0 && suela==0 && tacon==0 && color==0 && acabado==0 && corrida==0 && marca==0){
+                Toast.makeText(getApplicationContext(),"No tienes configurados los similares",Toast.LENGTH_LONG).show();
+            }
+
+
         if(marca==1){
-            marcaS="="+consultarMarca();
+            if(temporada==1 || clasificacion==1 || sublinea==1 || suela==1 || tacon==1 || color==1 || acabado==1 || corrida==1 ){
+                where+=" a.marca="+consultarMarca()+" and ";
+            }else{
+                where+=" a.marca="+consultarMarca();
+            }
+
         }
 
+
         if(temporada==1){
-            temporadaS="="+similar.getTemporada();
+
+            if( clasificacion==1 || sublinea==1 || suela==1 || tacon==1 || color==1 || acabado==1 || corrida==1 ){
+                where+=" a.temporad="+similar.getTemporada()+" and ";
+            }else{
+                where+=" a.temporad="+similar.getTemporada();
+            }
+
         }
 
         if(clasificacion==1){
-            clasificacionS="="+similar.getClasificacion();
+            if( sublinea==1 || suela==1 || tacon==1 || color==1 || acabado==1 || corrida==1 ){
+                where+=" a.clasific="+similar.getClasificacion()+" and";
+            }else{
+                where+=" a.clasific="+similar.getClasificacion();
+            }
         }
 
         if(sublinea==1){
-            sublineaS="="+similar.getSubLinea();
+            if(  suela==1 || tacon==1 || color==1 || acabado==1 || corrida==1 ){
+                where+=" a.sublinea="+similar.getSubLinea()+" and";
+            }else{
+                where+=" a.sublinea="+similar.getSubLinea();
+            }
         }
 
         if(suela==1){
-            suelaS="="+similar.getSuela();
+            if(  tacon==1 || color==1 || acabado==1 || corrida==1 ){
+                where+=" a.suela="+similar.getSuela()+" and";
+            }else{
+                where+=" a.suela="+similar.getSuela();
+            }
+
         }
 
         if(tacon==1){
-            taconS="="+similar.getTacon();
+            if( color==1 || acabado==1 || corrida==1 ){
+                where+=" a.tacon="+similar.getTacon()+" and";
+            }else{
+                where+=" a.tacon="+similar.getTacon();
+            }
         }
 
         if(color==1){
-            colorS="="+consultarColor();
+            if( acabado==1 || corrida==1 ){
+                where+=" a.color="+consultarColor()+" and";
+            }else{
+                where+=" a.color="+consultarColor();
+            }
+
         }
 
         if(acabado==1){
-            acabadoS="="+consultarAcabado();
+            if( corrida==1 ){
+                where+=" a.acabado="+consultarAcabado()+" and";
+            }else{
+                where+=" a.acabado="+consultarAcabado();
+            }
+
         }
 
         if(corrida==1){
-            corridaS="="+similar.getCorrida();
+            where+=" a.corrida="+similar.getCorrida();
         }
 
-        getSimilares(marcaS, temporadaS, clasificacionS, sublineaS, suelaS, taconS, colorS, acabadoS, corridaS);
+        getSimilares();
     }
 
 
@@ -241,6 +290,7 @@ public class Similares extends AppCompatActivity {
 
 
             while (rs.next()) {
+
 
 
                 acabado=rs.getString(1);

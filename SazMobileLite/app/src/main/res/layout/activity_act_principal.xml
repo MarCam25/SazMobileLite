@@ -33,14 +33,17 @@
             android:layout_height="5dp"
             android:background="#004d73"
             />
+
         <Spinner
             android:id="@+id/spTiendas"
-
             android:layout_width="match_parent"
             android:layout_marginTop="0dp"
             android:layout_height="wrap_content"
-            style="@style/spinner_style"
-            android:gravity="center"></Spinner>
+            android:gravity="center">
+
+
+        </Spinner>
+
         <TextView
             android:layout_width="1000dp"
             android:layout_height="5dp"
