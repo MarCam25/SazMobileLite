@@ -233,7 +233,7 @@ public class ActPrincipal extends AppCompatActivity {
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
             ResultSet rs = st.executeQuery("select numero from tiendas where nombre='"+spTiendas.getSelectedItem()+"'");
-
+            Toast.makeText(getApplicationContext(), "Cargando...", Toast.LENGTH_LONG).show();
 
             while (rs.next()) {
 

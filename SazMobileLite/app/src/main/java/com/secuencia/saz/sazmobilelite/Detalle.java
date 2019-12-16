@@ -46,7 +46,7 @@ public class Detalle extends AppCompatActivity {
 
 
 
-        Toast.makeText(getApplicationContext(), ""+valores, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), ""+valores, Toast.LENGTH_SHORT).show();
         estilo=(TextView)findViewById(R.id.estilo);
         color=(TextView)findViewById(R.id.color);
         acabado=(TextView)findViewById(R.id.acabado);
@@ -117,7 +117,7 @@ public class Detalle extends AppCompatActivity {
                     "                     left join empleado e on a.comprador=e.numero inner join departamentos d on a.DEPARTAMENTO=d.NUMERO\n" +
                     "                     inner join tacones ta on a.TACON=ta.NUMERO inner join plantillas pl on a.PLANTILLA=pl.NUMERO inner join forros f on a.FORRO=f.NUMERO\n" +
                     "                     inner join corridas co on a.corrida=co.id inner join suelas su on a.SUELA=su.numero inner join colores c on a.color = c.numero\n" +
-                    "                     inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id = im.id   where a.estilo = '"+style+"' and a.color="+Principal.idColor+" and a.acabado="+Principal.idAcabado+"  and a.marca ="+marca+" and a.corrida="+Principal.idCorrida+"";
+                    "                     inner join acabados ac on a.ACABADO=ac.NUMERO inner join marcas ma on a.MARCA=ma.NUMERO left join imagenes im on a.id = im.id   where a.barcode ='"+Principal.bar+"'";
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {

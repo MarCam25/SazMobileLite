@@ -9,6 +9,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -69,6 +70,8 @@ import java.util.TimerTask;
 
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 
+
+
 public class ConusltaMarca extends Fragment {
 
 
@@ -128,6 +131,7 @@ public class ConusltaMarca extends Fragment {
     ModeloTienda mt=new ModeloTienda();
     String[] cantVal;
     String contCant;
+
 
     ArrayList listaTiendas=new ArrayList();
     private String numeroTienda;
@@ -210,17 +214,11 @@ public class ConusltaMarca extends Fragment {
 
         listado=mt.getNombreTienda();
 
-
-
-
         //obtenerLineaConexion();
         ToolBarNombre();
 
 
         getUser();
-
-
-
 
 
 
@@ -308,7 +306,7 @@ public class ConusltaMarca extends Fragment {
 
 
                 limpiarCajas();
-
+                buscador();
 
 
                 Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG).show();
@@ -337,24 +335,17 @@ public class ConusltaMarca extends Fragment {
                         spColor.setAdapter(adapter);
 
                     } else if (buscador == 1 && Principal.scannPass==false) {
-                        buscarMarcas();
+                        //buscarMarcas();
+                        llenarCorrida();
+                        obtenerCorrida();
 
-                        if (marcaCantidad == 1) {
-
-
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
-                            spMarca.setAdapter(adapter);
-                            spMarca.setSelection(1);
-
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaCorrida);
+                            spCorrida.setAdapter(adapter);
+                            spCorrida.setSelection(1);
 
 
-                        } else if (marcaCantidad > 1) {
-
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
-                            spMarca.setAdapter(adapter);
 
 
-                        }
 
                     } else if (Principal.scannPass == false && buscador == 0) {
                         llenarSp();
@@ -366,6 +357,7 @@ public class ConusltaMarca extends Fragment {
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, listaMarca);
                         spMarca.setAdapter(adapter);
                         spMarca.setSelection(obtenerPosicionItem(spMarca, marcaBar));
+
 
                     }
                 }else{
@@ -386,11 +378,14 @@ public class ConusltaMarca extends Fragment {
             Principal.similarPass=false;
         }
 
+
         FormatoFecha();
         retomarPedidos();
         ConsultarNuevosRegistros();
 
+
         inicializarMarca();
+
 
         btnSimilares.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -461,6 +456,8 @@ public class ConusltaMarca extends Fragment {
                     }else{
                         try {
 
+                            Principal.estilo=sp2.getSelectedItem().toString();
+                            Principal.bar=barcode;
                             Intent detalle = new Intent(getActivity(), Detalle.class);
 
                             detalle.putExtra("valores", sp2.getSelectedItemId() + "-" + Principal.idColor + "-" + Principal.idAcabado + "-" + idMarca + "-" + empress);
@@ -490,6 +487,7 @@ public class ConusltaMarca extends Fragment {
 
                 if(punto.getSelectedItem().equals("")) {
 
+
                 }else{
                     consultarCantidadReal();
                     traerPrecio();
@@ -501,6 +499,7 @@ public class ConusltaMarca extends Fragment {
 
             }
         });
+
 
 /*
 
@@ -588,10 +587,12 @@ public class ConusltaMarca extends Fragment {
 
                 try {
 
-                    Toast toast = Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG);
-                    TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
-                    x.setTextColor(Color.BLACK);
-                    toast.show();
+
+                    Toast.makeText(getActivity(), "Cargando...", Toast.LENGTH_LONG).show();
+
+
+
+
                     listaAcabado.clear();
 
                     listaCorrida.clear();
@@ -675,7 +676,6 @@ public class ConusltaMarca extends Fragment {
                         listaCorrida.clear();
                         spCorrida.setAdapter(null);
 
-
                     } else {
 
 
@@ -749,6 +749,7 @@ public class ConusltaMarca extends Fragment {
 
 
 
+
         spCorrida.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -801,8 +802,10 @@ public class ConusltaMarca extends Fragment {
                         if (puntosCantidad == 1) {
                             llenarTabla();
 
+
                             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
                             punto.setAdapter(adapter);
+
 
 
                         } else if (puntosCantidad > 1) {
@@ -820,6 +823,8 @@ public class ConusltaMarca extends Fragment {
                         llenarPuntos();
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_punto, puntos);
                         punto.setAdapter(adapter);
+
+
 
                     } else if (buscador == 1 && Principal.scannPass == true) {
                         Similar simi = new Similar();
@@ -872,6 +877,7 @@ public class ConusltaMarca extends Fragment {
 
     }
 
+
     private void enviarADetalle() {
         double tem;
         puntoTem = punto.getSelectedItem().toString();
@@ -885,6 +891,7 @@ public class ConusltaMarca extends Fragment {
         cantidadTem = null;
         precioTem = null;
     }
+
 
 
 
@@ -908,6 +915,9 @@ public class ConusltaMarca extends Fragment {
         }
 
     }
+
+
+
 
     public void deleteContenedor(){
         ConexionSQLiteHelper conn = new ConexionSQLiteHelper(context, "db tienda", null, 1);
@@ -993,6 +1003,7 @@ public class ConusltaMarca extends Fragment {
         BarCodeFIN="";
         estiloBar="";
         VarEstilo="";
+
 
         sku=null;
         VarEstilo=var;
@@ -1126,6 +1137,7 @@ public class ConusltaMarca extends Fragment {
 
             while (rs.next())
             {
+
                 tem=rs.getInt(1);
 
             }
@@ -1531,6 +1543,36 @@ public class ConusltaMarca extends Fragment {
 
     }
 
+    public void llenarCorrida() {
+        idMarca=getMarca(spMarca.getSelectedItem().toString());
+        //Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
+        listaCorrida.clear();
+        listaCorrida.add(" ");
+
+
+        try {
+            Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
+            String sql="select  co.Nombre as Corrida,  co.id from corridas co inner join articulo a on co.id = a.corrida where a.estilo = '"+sp2.getSelectedItem()+"'  and a.marca =" +idMarca+"";
+            ResultSet rs = st.executeQuery(sql);
+
+
+            while (rs.next()) {
+
+                corridaCantidad++;
+                listaCorrida.add(rs.getString(1));
+                spCorrida.setId(rs.getInt(2));
+
+
+
+            }
+
+            // Toast.makeText(Principal.this,"Inicio de sesion Exitosa...!!!: " + empresa, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Error en sp5", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     public void contarSp5() {
         idMarca=getMarca(spMarca.getSelectedItem().toString());
         Principal.idAcabado=getAcabado(spAcabado.getSelectedItem().toString());
@@ -1616,7 +1658,8 @@ public class ConusltaMarca extends Fragment {
         Principal.scannPass=false;
         try {
             Statement st = bdc.conexionBD(me.getServer(),me.getBase(),me.getUsuario(),me.getPass()).createStatement();
-            String sql="select precio,  DESCTO from precios where BARCODE="+"'"+barcode+"' and talla="+punto.getSelectedItem();
+           // String sql="select precio,  DESCTO from precios where BARCODE="+"'"+barcode+"' and talla="+punto.getSelectedItem();
+            String sql="select precio,  isnull(DESCTO,0) from precios where BARCODE="+"'"+barcode+"' and talla="+punto.getSelectedItem();
             ResultSet rs = st.executeQuery(sql);
 
 
@@ -2327,22 +2370,18 @@ public class ConusltaMarca extends Fragment {
     public void ReinicarContadores(){
         colorCantidad=0;
         acabadoCantidad=0;
-
         corridaCantidad=0;
 
-    }
+}
 
     public void limpiarListas(){
         listaCorrida.clear();
-
         listaAcabado.clear();
         lista.clear();
     }
 
 
     public void mismoDispositivo() {
-
-
         String modelo = Build.MODEL;
         String serie = Build.MANUFACTURER;
         String marca = Build.ID;
@@ -2509,6 +2548,8 @@ public class ConusltaMarca extends Fragment {
 
     }
 
+
+
     public void buscarMarca(){
         listaMarca.add(null);
         listaMarca.clear();
@@ -2552,7 +2593,9 @@ public class ConusltaMarca extends Fragment {
             punto.setAdapter(null);
             limpiarCajas();
 
+
             ReinicarContadores();
+
 
             contarSp4();
             if (Principal.scannPass == true) {
@@ -2573,8 +2616,11 @@ public class ConusltaMarca extends Fragment {
                 spMarca.setAdapter(adapter);
 
             }
+
         } catch (Exception e) {
             e.getMessage();
         }
     }
+
+
 }

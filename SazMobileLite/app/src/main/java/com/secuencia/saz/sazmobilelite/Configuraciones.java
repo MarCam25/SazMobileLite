@@ -1,7 +1,9 @@
 package com.secuencia.saz.sazmobilelite;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -77,6 +79,7 @@ public class Configuraciones extends AppCompatActivity {
         getSupportActionBar().setTitle("SazMobile Lite -Configuraciones-");
 
         buscador();
+       // ConsultarConfigG();
         verificarSimilar();
 
 
@@ -95,8 +98,10 @@ public class Configuraciones extends AppCompatActivity {
 
 
                 deleteSimilares();
+              //  EliminarConfigG();
 
                 if(CheckBusqueda.isChecked() == true){
+
                     insertCheckBuscador();
 
                 }
@@ -283,7 +288,7 @@ public class Configuraciones extends AppCompatActivity {
                {
 
                }else{
-                   buscador=Integer.parseInt(contenedor);
+                  buscador=Integer.parseInt(contenedor);
                }
 
                 if(contenedor2==null)
@@ -508,6 +513,36 @@ public class Configuraciones extends AppCompatActivity {
 
     }
 
+    public void GuardarConfigG(){
+
+        SharedPreferences preferencias=getSharedPreferences("configuracion", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=preferencias.edit();
+        editor.putInt("status", 1);
+        editor.commit();
+        finish();
+    }
+
+
+
+    public void ConsultarConfigG(){
+        try {
+            SharedPreferences prefe = getSharedPreferences("configuracion", Context.MODE_PRIVATE);
+            buscador = prefe.getInt("status", 0);
+            Toast.makeText(this, ""+buscador, Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            e.getMessage();
+        }
+
+    }
+
+    public void EliminarConfigG(){
+        SharedPreferences preferencias=getSharedPreferences("configuracion", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=preferencias.edit();
+        editor.putInt("status", 0);
+        editor.commit();
+        finish();
+
+    }
 
 
 

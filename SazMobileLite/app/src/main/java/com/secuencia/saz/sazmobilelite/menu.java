@@ -75,12 +75,12 @@ public class menu extends AppCompatActivity
         usuario= getIntent().getStringExtra("Usuario");
         getSupportActionBar().setTitle("SazMobile Lite -Existencias-");
 
-        if(Principal.busqueda2==true){
+        /*if(Principal.busqueda2==true){
             fm.beginTransaction().replace(R.id.contenedorMenu, new ConusltaMarca()).commit();
         }else if(Principal.passConsulta==true) {
             Principal.passConsulta=false;
             fm.beginTransaction().replace(R.id.contenedorMenu, new ConsultaF()).commit();
-        }
+        }*/
         //  Intent  intent= new Intent(getApplicationContext(), Hamburguesa.class);
 
 

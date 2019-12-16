@@ -111,6 +111,7 @@ public class Similares extends AppCompatActivity {
         ConexionSQLiteHelper conn = new ConexionSQLiteHelper(this, "db tienda", null, 1);
         SQLiteDatabase db = conn.getReadableDatabase();
 
+
         String sql="SELECT nombreT FROM tienda where id=1";
         Cursor cursor = db.rawQuery(sql, null);
         while (cursor.moveToNext()) {
@@ -119,6 +120,7 @@ public class Similares extends AppCompatActivity {
 
         }
     }
+
 
 
     public void consultarSimilares(){

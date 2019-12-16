@@ -5,21 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Configuraciones"
-    android:background="#f4f4f3"
-    >
+    android:background="#f4f4f3">
 
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:ignore="MissingConstraints">
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-
         >
-
 
 
        <CheckBox
@@ -32,6 +31,7 @@
            android:layout_marginLeft="20dp"
         />
 
+
         <CheckBox
             android:layout_marginTop="10dp"
             android:id="@+id/CheckBusqueda2"
@@ -43,6 +43,8 @@
             android:visibility="invisible"
             />
 
+
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,7 +55,6 @@
             android:layout_marginTop="15dp"
 
             />
-
 
 
 
@@ -69,9 +70,6 @@
 
 
 
-
-
-
         <CheckBox
             android:layout_marginTop="10dp"
             android:id="@+id/CheckTemporada"
@@ -81,6 +79,7 @@
             android:textSize="18dp"
             android:layout_marginLeft="20dp"
             />
+
 
 
         <CheckBox
@@ -157,12 +156,6 @@
             android:textSize="18dp"
             android:layout_marginLeft="20dp"
             />
-
-
-
-
-
-
 
         <Button
             android:id="@+id/btnGuardar"

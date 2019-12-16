@@ -20,7 +20,6 @@
 
 
             <LinearLayout
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#f4f4f3"
@@ -38,34 +37,11 @@
                     android:text="Escanear"
                     android:textAllCaps="false"
                     android:textColor="#ffffff"
+                    android:visibility="invisible"
                     android:textSize="20dp" />
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="#f4f4f3"
-                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Estilo"
-                        android:textColor="#3f3f40"
-                        android:textSize="20dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Color"
-                        android:textColor="#3f3f40"
-                        android:textSize="20dp" />
-
-
-                </LinearLayout>
 
 
                 <LinearLayout
@@ -74,25 +50,29 @@
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/sp2"
+                        android:id="@+id/edtEstilo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
                         android:background="#e2e2de "
                         android:elegantTextHeight="false"
                         android:hint="Estilo"
                         android:singleLine="true"
                         android:textColor="#3f3f40"
+                        android:textAlignment="center"
                         android:textSize="25dp" />
 
-                    <Spinner
-                        android:id="@+id/sp"
+
+                    <Button
+                        android:id="@+id/btnBuscar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginTop="5dp"
-                        style="@style/spinner_style"
-                        android:clickable="true" />
+                        android:layout_marginRight="5dp"
+                        android:text="Buscar"
+                        />
 
 
                 </LinearLayout>
@@ -107,92 +87,14 @@
                     android:background="#f4f4f3"
                     android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="10dp"
-                        >
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Acabado"
-                            android:textColor="#3f3f40"
-                            android:textSize="20dp" />
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Marca"
-                            android:textColor="#3f3f40"
-                            android:textSize="20dp" />
 
-                    </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="10dp"
-                        >
-
-                        <Spinner
-                            android:id="@+id/sp3"
-                            style="@style/spinner_style"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            />
-
-                        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-                            android:id="@+id/sp4"
-                            android:layout_width="match_parent"
-                            android:contextClickable="true"
-                            style="@style/spinner_style"
-                            android:importantForAutofill="auto"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            />
-
-                </LinearLayout>
 
                 </LinearLayout>
 
 
 
-
-
-
-
-
-
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Corrida"
-                        android:layout_marginTop="10dp"
-                        android:textColor="#3f3f40"
-                        android:textSize="20dp" />
-
-                    <Spinner
-                        android:id="@+id/sp5"
-                        style="@style/spinner_style"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-
-                </LinearLayout>
 
 
                 <LinearLayout
@@ -209,17 +111,37 @@
                         android:background="#f4f4f3"
                         android:gravity="center"
                         android:paddingLeft="10dp"
-                        android:text="Selecciona un punto"
+                        android:text="Selecciona un producto"
                         android:textColor="#3f3f40"
-                        android:textSize="30dp" />
+                        android:textSize="20dp" />
 
-                    <Spinner
-                        android:id="@+id/punto"
+                    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+                        android:id="@+id/spProducto"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         style="@style/spinner_style"
                         android:layout_gravity="center"
                         />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="#f4f4f3"
+                        android:gravity="center"
+                        android:paddingLeft="10dp"
+                        android:text="Selecciona un punto"
+                        android:textColor="#3f3f40"
+                        android:textSize="20dp" />
+
+                    <Spinner
+                        android:id="@+id/punto"
+                        style="@style/spinner_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+
+
+                        ></Spinner>
 
                     <TextView
                         android:layout_width="1000dp"
@@ -250,7 +172,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_gravity="center"
+                            android:gravity="center"
                             android:text="Precio"
                             android:textColor="#3f3f40"
                             android:textSize="20dp" />
@@ -270,7 +192,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_gravity="center"
+                            android:gravity="center"
                             android:text="Total"
                             android:textColor="#3f3f40"
                             android:textSize="20dp" />
@@ -285,6 +207,7 @@
                         android:layout_height="40dp"
                         android:background="#f4f4f3"
                         android:orientation="horizontal">
+
 
 
                         <TextView

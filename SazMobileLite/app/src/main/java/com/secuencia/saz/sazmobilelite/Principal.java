@@ -54,10 +54,13 @@ public class Principal extends AppCompatActivity {
     public String res;
     public static Boolean similarPass=false;
 
+    public static  String bar="";
+
     public static  boolean scannPass=false;
     public static boolean passConsulta=false;
     public static boolean busqueda2=false;
     public static String punto="";
+    public static String estilo="";
     public static int location = 0;
     CheckBox check;
     public RequestQueue queue;
@@ -102,7 +105,7 @@ public class Principal extends AppCompatActivity {
 
        //this.deleteDatabase("db tienda");
 
-        consultarBuscador();
+        //consultarBuscador();
 
         Date date=new Date();
        fechaHoy=dateFormat.format(date);
@@ -122,7 +125,11 @@ public class Principal extends AppCompatActivity {
                 toast.show();
 
                 inicializarDatos();
-                consulta();
+
+
+                    consulta();
+
+
             }
         });
 
@@ -149,7 +156,7 @@ public class Principal extends AppCompatActivity {
                     try {
                         Password = response.get("EncriptaJSONResult").toString();
 
-
+                        Toast.makeText(getApplicationContext(), "Cargando...", Toast.LENGTH_LONG).show();
                         Statement st = conex.conexionBD().createStatement();
                         String query = "select  Empresa from Rlogin where Usuario= '" + usuario + "' and Clave= '" + Password + "' and Activo=1 and suspendido=0";
                         ResultSet rs = st.executeQuery(query);
@@ -192,6 +199,7 @@ public class Principal extends AppCompatActivity {
                                             if (fechaContrato != null) {
                                                 compararFechaReta();
                                             }
+
 
 
                                             if (verificador == 1 && membrecia == true) {
@@ -870,8 +878,6 @@ public class Principal extends AppCompatActivity {
         String serie = Build.MANUFACTURER;
         String marca = Build.ID;
 
-
-
         try{
             Statement st= conex.conexionBD().createStatement();
             String sql="insert into smAppDispositivos (mail,idEmpresa,fecha,idDisp,nombreDisp,app,llave)values('"+usuario+"',"+empresa+",GETDATE(),'"+marca+"','"+serie+" "+ modelo+"',1,NEWID());";
@@ -889,12 +895,14 @@ public class Principal extends AppCompatActivity {
         String[] fechaHAux=fechaHoy.split("");
 
 
+
       int añoC=Integer.parseInt(fechaCAux[1]+fechaCAux[2]+fechaCAux[3]+fechaCAux[4]);
       int mesC=Integer.parseInt(fechaCAux[6]+fechaCAux[7]);
       int diaC=Integer.parseInt(fechaCAux[9]+fechaCAux[10]);
 
-      String hoy=fechaHAux[1]+fechaHAux[2]+fechaHAux[3]+fechaHAux[4]+"-"+fechaHAux[5]+fechaHAux[6]+"-"+fechaHAux[7]+fechaHAux[8];
 
+
+      String hoy=fechaHAux[1]+fechaHAux[2]+fechaHAux[3]+fechaHAux[4]+"-"+fechaHAux[5]+fechaHAux[6]+"-"+fechaHAux[7]+fechaHAux[8];
 
 
 
@@ -970,6 +978,7 @@ public void updateDispositivo(){
         Statement st= conex.conexionBD().createStatement();
         String sql="  update smAppAccesos set ultimoAcceso=GETDATE(),idDisp='"+marca+"-"+serie+"-"+modelo+"',nombreDisp='"+serie+" "+modelo+"', activo=1, app=1 where mail='"+usuario+"' and app=1";
         st.executeUpdate(sql);
+
 
 
     }catch (Exception e ){
@@ -1072,12 +1081,9 @@ public void updateDispositivo(){
             }
         }catch (Exception e){
 
-            Toast toast = Toast.makeText(getApplicationContext(), "La versión nueva de SazMobile LITE se ha instalado", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
             TextView x = (TextView) toast.getView().findViewById(android.R.id.message);
-            x.setTextColor(Color.BLACK); toast.show();
-            Intent intent = new Intent(getApplicationContext(), Principal.class);
-            getApplicationContext().deleteDatabase("db tienda");
-            startActivity(intent);
+            x.setTextColor(Color.WHITE); toast.show();
 
         } finally {
 
